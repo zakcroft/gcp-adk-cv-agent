@@ -1,0 +1,50 @@
+John Smith
+Software Engineer
+john.smith@email.com | +44 7700 900000 | London, UK
+LinkedIn: linkedin.com/in/johnsmith | GitHub: github.com/johnsmith
+
+PROFESSIONAL SUMMARY
+Software engineer with 5 years of experience in backend development. Worked on various projects using Python and JavaScript. Responsible for building APIs and maintaining databases.
+
+EXPERIENCE
+
+Software Engineer | TechCorp Ltd | London, UK | Jan 2021 - Present
+• Worked on backend systems and APIs
+• Responsible for database management
+• Used Python, Django, and PostgreSQL
+• Participated in code reviews
+• Helped with deployment processes
+
+Junior Developer | StartupXYZ | London, UK | Jun 2019 - Dec 2020
+• Developed web applications
+• Worked on frontend and backend
+• Used JavaScript, React, and Node.js
+• Fixed bugs and implemented features
+• Collaborated with team members
+
+EDUCATION
+
+BSc Computer Science | University of London | 2015 - 2019
+• Graduated with 2:1 honours
+• Relevant coursework: Algorithms, Databases, Web Development
+
+SKILLS
+
+Programming Languages: Python, JavaScript, SQL
+Frameworks: Django, React, Node.js
+Databases: PostgreSQL, MongoDB
+Tools: Git, Docker, AWS
+Other: REST APIs, Agile methodologies
+
+PROJECTS
+
+Personal Blog Platform
+• Built a blogging platform using Django
+• Implemented user authentication and comments
+• Deployed on AWS
+
+E-commerce API
+• Created REST API for online shop
+• Used Node.js and Express
+• Integrated payment processing
+

@@ -11,23 +11,22 @@ logger = logging.getLogger(__name__)
 class AgentModel(BaseModel):
     """Agent model settings."""
 
-    name: str = Field(default="cv_agent")
-    model: str = Field(default="gemini-2.5-flash")
+    name: str = Field(default="cv_agent_app")
+    model: str = Field(default="gemini-2.5-pro")
 
 
 class Config(BaseSettings):
-    """Configuration settings for the customer service agent."""
+    """Configuration settings for the CV agent."""
 
     model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../.env"),
+        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.env"),
         env_prefix="GOOGLE_",
         case_sensitive=True,
     )
 
     agent_settings: AgentModel = Field(default=AgentModel())
-    app_name: str = "cv_agent_app"
+    app_name: str = "agents"
     CLOUD_PROJECT: str = Field(default="dev")
-    CLOUD_LOCATION: str = Field(default="europe-west2")
-    STAGING_BUCKET: str | None = Field(default="staging-bucket")
+    CLOUD_LOCATION: str = Field(default="europe-west4")
     GENAI_USE_VERTEXAI: str = Field(default="1")
     API_KEY: str | None = Field(default="")
