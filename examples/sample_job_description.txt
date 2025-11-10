@@ -1,0 +1,51 @@
+Senior Backend Engineer
+InnovateTech Solutions | London, UK | Full-time
+
+About InnovateTech:
+We're a fast-growing fintech company revolutionizing digital payments. Our platform processes millions of transactions daily, and we're looking for talented engineers to help us scale.
+
+Role Overview:
+We're seeking an experienced Senior Backend Engineer to join our Platform Engineering team. You'll be responsible for designing and building highly scalable, reliable backend systems that power our payment infrastructure.
+
+Key Responsibilities:
+• Design and implement robust, scalable microservices architecture
+• Build high-performance RESTful APIs handling millions of requests per day
+• Optimize database queries and system performance
+• Lead technical design discussions and mentor junior engineers
+• Ensure system reliability, security, and compliance with financial regulations
+• Collaborate with product managers and frontend engineers to deliver features
+• Participate in on-call rotation for production support
+
+Required Skills & Experience:
+• 5+ years of professional backend development experience
+• Expert-level proficiency in Python (Django or FastAPI preferred)
+• Strong experience with microservices architecture and distributed systems
+• Deep understanding of database design and optimization (PostgreSQL, Redis)
+• Experience with cloud platforms (AWS, GCP, or Azure)
+• Proven track record of building and scaling high-traffic systems
+• Strong knowledge of API design principles and best practices
+• Experience with containerization (Docker, Kubernetes)
+• Excellent problem-solving and debugging skills
+• Strong communication skills and ability to work in cross-functional teams
+
+Nice to Have:
+• Experience in fintech or payment processing systems
+• Knowledge of event-driven architectures (Kafka, RabbitMQ)
+• Experience with monitoring and observability tools (Prometheus, Grafana)
+• Contributions to open-source projects
+• Experience with CI/CD pipelines and infrastructure as code
+
+What We Offer:
+• Competitive salary (£80,000 - £110,000) based on experience
+• Equity options
+• Flexible working arrangements (hybrid: 2 days in office)
+• Professional development budget
+• Modern tech stack and cutting-edge projects
+• Collaborative, innovative team culture
+
+Company Culture:
+We value innovation, ownership, and continuous learning. Our engineering team is passionate about building robust, elegant solutions to complex problems. We encourage experimentation, embrace failure as learning, and celebrate success together.
+
+How to Apply:
+Please submit your CV and a brief cover letter explaining why you're interested in this role and what you can bring to our team.
+
