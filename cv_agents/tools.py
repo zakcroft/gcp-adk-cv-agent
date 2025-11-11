@@ -50,15 +50,35 @@ async def load_customer_documents(tool_context: ToolContext) -> DocumentsResult:
 
         cv_filename = artifacts[0]
         job_filename = artifacts[1]
+        cv_text = ""
+        job_text = ""
 
-        cv_artifact = tool_context.load_artifact(cv_filename)
-        job_artifact = tool_context.load_artifact(job_filename)
+        #  CV
+        cv_artifact_part = await tool_context.load_artifact(cv_filename)
+        print("cv_artifact_part", cv_artifact_part.inline_data)
 
-        print("cv_artifact", cv_artifact)
-        print("job_artifact", job_artifact)
+        if cv_artifact_part and cv_artifact_part.inline_data:
+            print(f"Successfully loaded latest Python artifact '{cv_filename}'.")
+            print(f"MIME Type: {cv_artifact_part.inline_data.mime_type}")
 
-        cv_text = cv_artifact.inline_data.data.decode("utf-8")
-        job_text = job_artifact.inline_data.data.decode("utf-8")
+            pdf_bytes = cv_artifact_part.inline_data.data
+            cv_text = pdf_bytes.decode("utf-8")
+            print(f"Report size: {len(pdf_bytes)} bytes.")
+        else:
+            print(f"Python artifact '{cv_filename}' not found.")
+
+        # job description
+        job_artifact_part = await tool_context.load_artifact(job_filename)
+
+        if job_artifact_part and job_artifact_part.inline_data:
+            print(f"Successfully loaded latest Python artifact '{job_filename}'.")
+            print(f"MIME Type: {job_artifact_part.inline_data.mime_type}")
+
+            pdf_bytes = job_artifact_part.inline_data.data
+            job_text = pdf_bytes.decode("utf-8")
+            print(f"Report size: {len(pdf_bytes)} bytes.")
+        else:
+            print(f"Python artifact '{job_filename}' not found.")
 
         logger.info(f"Loaded CV ({len(cv_text)} chars) and job description ({len(job_text)} chars)")
 

@@ -5,8 +5,6 @@ You coordinate a structured workflow that analyses a job description,
 rewrites the user's CV iteratively, and integrates human feedback
 until the final CV is approved.
 
-The profile of the current customer is:
-
 Maintain this context across all sub-agents and stages.
 Ensure writing is factual, clear, concise, and in British English.
 """

@@ -14,7 +14,7 @@ writer = Agent(
     name="writer",
     description="Generates CV drafts tailored to job descriptions.",
     instruction=prompt.WRITER_INSTRUCTION,
-    output_key="initial_draft",
+    output_key="cv_draft",
 )
 
 # Loop agent for iterative CV refinement (Critic → Reviser)

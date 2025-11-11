@@ -4,15 +4,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel, Field
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+GEMINI_2_5_pro = "gemini-2.5-pro"
+GEMINI_2_5_flash = "gemini-2.5-flash"
 
 
 class AgentModel(BaseModel):
     """Agent model settings."""
 
     name: str = Field(default="cv_agent_app")
-    model: str = Field(default="gemini-2.5-pro")
+    model: str = Field(default=GEMINI_2_5_flash)
 
 
 class Config(BaseSettings):
