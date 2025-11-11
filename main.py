@@ -136,9 +136,7 @@ async def main():
     print("\n" + "=" * 60)
     print("CV Agent - Interactive Chat")
     print("=" * 60)
-    print("Files loaded: sample_cv.txt, sample_job_description.txt")
-    print("Type 'exit' or 'quit' to end the conversation")
-    print("=" * 60 + "\n")
+    print("Files loaded")
     print(
         await artifact_service.list_artifact_keys(
             app_name=config.app_name,
@@ -146,6 +144,8 @@ async def main():
             session_id=SESSION_ID,
         )
     )
+    print("Type 'exit' or 'quit' to end the conversation")
+    print("=" * 60 + "\n")
 
     await chat_loop(runner)
 
