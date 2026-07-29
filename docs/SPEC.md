@@ -134,9 +134,9 @@ it before creating clients/instrumentation. Auth is gcloud ADC
 
 Two complementary layers (see also `docs/superpowers/specs/2026-07-16-adk-trajectory-eval-design.md`):
 
-### 6.1 ADK evalset — `eval/cv_agent.evalset.json`
+### 6.1 ADK evalset — `tests/eval/data/cv_agent.evalset.json`
 
-Criteria (`eval/test_config.json`): `tool_trajectory_avg_score: 1.0` (exact
+Criteria (`tests/eval/data/test_config.json`): `tool_trajectory_avg_score: 1.0` (exact
 tool-call match), `response_match_score: 0.5` (ROUGE similarity; loose because
 wording varies).
 
@@ -165,7 +165,7 @@ Gemini calls and hit Vertex AI `429 RESOURCE_EXHAUSTED` on this project's
 quota. 429 = quota, not a regression; wait ~1 min and retry.
 
 `adk eval` CLI also works (`PYTHONPATH=$PWD uv run adk eval cv_agents
-eval/cv_agent.evalset.json --config_file_path eval/test_config.json`) but
+tests/eval/data/cv_agent.evalset.json --config_file_path tests/eval/data/test_config.json`) but
 writes result files to `cv_agents/.adk/eval_history/` (gitignored); the chosen
 workflow is pytest + Langfuse traces as the single record.
 
@@ -181,9 +181,19 @@ workflow is pytest + Langfuse traces as the single record.
 4. **User-simulation evals** — ADK `ConversationScenario` (persona +
    conversation_plan) for multi-turn robustness; experimental in ADK 1.17.
 5. Consider making `max_iterations` and models configurable via `Config`.
+6. **Migrate to ADK 2.0** (GA since 2026-05-19; currently on 1.17). Breaking:
+   agents become graph nodes (`BaseNode`), event schema changes. Verify impact
+   on LoopAgent/SequentialAgent, `output_key`, `{placeholder}` templating,
+   `AgentEvaluator`, and the openinference instrumentation before upgrading.
+   Do it on a branch with both eval tests as the safety net.
 
 ## 8. Conventions
 
+- **This spec is kept current by a Claude Code Stop hook**
+  (`.claude/hooks/spec-reminder.sh`, registered in `.claude/settings.json`):
+  when a session ends a turn with changes in `cv_agents/`, `main.py`, or
+  `tests/`, the hook prompts the agent once per change-set to reconcile this
+  file. Update SPEC.md when changes are meaningful; say so briefly when not.
 - British English in all agent-facing prose and generated CVs.
 - Commit style: imperative subject + bulleted body; NO Claude co-author
   trailer. Author identity: `Zak Croft <1917622+zakcroft@users.noreply.github.com>`.

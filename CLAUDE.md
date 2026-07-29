@@ -37,7 +37,7 @@ Tools return `.model_dump()` dicts (not Pydantic objects) so Langfuse tool spans
 ## Observability & evals
 
 - Every run is traced to a **local Langfuse** (Docker, `http://localhost:3000`; compose project lives in `../langfuse`). Instrumentation: `GoogleADKInstrumentor` in `main.py` (app runs, user `user_1`) and `tests/eval/conftest.py` (eval runs, user `test_user`, sessions prefixed `___eval___session___`). The Langfuse client must be initialized **before** agents run or spans are dropped.
-- ADK evals live in `eval/cv_agent.evalset.json` (cases) + `eval/test_config.json` (criteria: `tool_trajectory_avg_score` 1.0, `response_match_score` 0.5). The eval harness **cannot preload artifacts**, so file-dependent happy paths are covered by `tests/eval/test_improve_cv_flow.py` instead.
+- ADK evals live in `tests/eval/data/cv_agent.evalset.json` (cases) + `tests/eval/data/test_config.json` (criteria: `tool_trajectory_avg_score` 1.0, `response_match_score` 0.5). The eval harness **cannot preload artifacts**, so file-dependent happy paths are covered by `tests/eval/test_improve_cv_flow.py` instead.
 - Debugging agent behaviour: query traces via Langfuse REST API (keys in `.env`) or ClickHouse directly (`docker exec langfuse-clickhouse-1 clickhouse-client`).
 
 ## Gotchas
