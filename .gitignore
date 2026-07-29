@@ -6,4 +6,4 @@ __pycache__/
 
 .claude/settings.local.json
 .adk/
-.claude/settings.local.json
+.claude/.spec-reminder-hash

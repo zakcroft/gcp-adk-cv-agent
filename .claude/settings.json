@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/spec-reminder.sh",
+            "timeout": 15,
+            "statusMessage": "Checking whether docs/SPEC.md needs an update..."
+          }
+        ]
+      }
+    ]
+  }
+}
