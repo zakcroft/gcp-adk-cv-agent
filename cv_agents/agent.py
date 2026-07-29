@@ -7,7 +7,7 @@ from google.adk.tools import FunctionTool
 from google.adk.artifacts import InMemoryArtifactService
 from google.genai import types
 
-from cv_agents.sub_agents.writer.agent import cv_writer_agent
+from cv_agents.sub_agents.writer.agent import cv_writer_sequential_agent
 from cv_agents.config import Config
 from cv_agents import prompt
 from cv_agents import tools
@@ -67,7 +67,7 @@ root_agent = Agent(
     name=config.agent_settings.name,
     model=config.agent_settings.model,
     instruction=prompt.ROOT_INSTRUCTION,
-    sub_agents=[cv_writer_agent],
+    sub_agents=[cv_writer_sequential_agent],
     tools=[load_docs_tool, list_files_tool],
     output_key="final_cv",
 )

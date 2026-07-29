@@ -35,11 +35,11 @@ your sub-agents (customer_cv and job_description).
 **The Improvement Workflow:**
 
 CRITICAL: You MUST call `load_customer_documents` and see it return
-status="success" BEFORE transferring to cv_writer_agent. NEVER transfer to
-cv_writer_agent without having loaded the documents first — the sub-agents
+status="success" BEFORE transferring to cv_writer_sequential_agent. NEVER transfer to
+cv_writer_sequential_agent without having loaded the documents first — the sub-agents
 cannot load documents themselves and will fail without them.
 
-Once the documents are loaded, transfer to cv_writer_agent, whose sub-agents
+Once the documents are loaded, transfer to cv_writer_sequential_agent, whose sub-agents
 work together in a Write → Critic → Revise cycle to produce an improved CV.
 
 This workflow consists of three specialised agents:

@@ -9,25 +9,25 @@ from cv_agents.sub_agents.writer import prompt
 configs = Config()
 
 
-writer = Agent(
+writer_agent = Agent(
     model=configs.agent_settings.model,
-    name="writer",
+    name="writer_agent",
     description="Generates CV drafts tailored to job descriptions.",
     instruction=prompt.WRITER_INSTRUCTION,
     output_key="cv_draft",
 )
 
 # Loop agent for iterative CV refinement (Critic → Reviser)
-# Terminates when reviser sets validated=true or after max_iterations
-reviser = LoopAgent(
-    name="reviser",
+# Terminates when the critic calls exit_loop or after max_iterations
+reviser_loop_agent = LoopAgent(
+    name="reviser_loop_agent",
     description="Iteratively critiques and revises the CV draft",
     sub_agents=[critic_agent, reviser_agent],
     max_iterations=3,
 )
 
-cv_writer_agent = SequentialAgent(
-    name="cv_writer_agent",
+cv_writer_sequential_agent = SequentialAgent(
+    name="cv_writer_sequential_agent",
     description="CV improvement workflow: Writer → Critic → Reviser loop",
-    sub_agents=[writer, reviser],
+    sub_agents=[writer_agent, reviser_loop_agent],
 )
