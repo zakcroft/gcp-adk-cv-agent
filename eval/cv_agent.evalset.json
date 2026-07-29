@@ -1,0 +1,45 @@
+{
+  "eval_set_id": "cv_agent_basic_eval_set",
+  "name": "cv_agent_basic_eval_set",
+  "description": "Basic trajectory and final-response eval for the CV agent's file-handling tools.",
+  "eval_cases": [
+    {
+      "eval_id": "list_files",
+      "conversation": [
+        {
+          "invocation_id": "6d786c02-3b46-4a97-a5b1-2e0f2a1c0001",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What files have I uploaded?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "You have not uploaded any files yet. Please upload your CV and the job description so I can help improve your CV."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_uploaded_files",
+                "args": {}
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "agents",
+        "user_id": "test_user",
+        "state": {}
+      }
+    }
+  ]
+}

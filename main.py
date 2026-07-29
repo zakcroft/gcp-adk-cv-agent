@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import warnings
-import os
+from datetime import datetime
 from pathlib import Path
 
 from google.adk.runners import Runner
@@ -12,17 +12,30 @@ from google.genai import types
 from cv_agents.agent import root_agent
 from cv_agents.config import Config
 
+from langfuse import get_client
+
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+
+GoogleADKInstrumentor().instrument()
+
 warnings.filterwarnings("ignore", category=UserWarning, module=".*pydantic.*")
 logger = logging.getLogger(__name__)
 config = Config()
 
-# Set environment variables for Vertex AI
-os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = config.GENAI_USE_VERTEXAI
-os.environ["GOOGLE_CLOUD_PROJECT"] = config.CLOUD_PROJECT
-os.environ["GOOGLE_CLOUD_LOCATION"] = config.CLOUD_LOCATION
+# Export Vertex AI / Langfuse settings from .env into the environment
+config.setup_environment()
 
 USER_ID = "user_1"
-SESSION_ID = "session_001"
+# Unique per run so each chat groups as its own session in Langfuse
+SESSION_ID = f"session_{datetime.now():%Y%m%d_%H%M%S}"
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 
 
 async def load_example_files_to_artifacts(
@@ -100,9 +113,9 @@ async def chat_loop(runner):
                 if not has_specific_part and event.is_final_response():
                     if event.content and event.content.parts and event.content.parts[0].text:
                         final_response_text = event.content.parts[0].text.strip()
-                        print(f"Rocket: {final_response_text}")
+                        print(f"final_response_text: {final_response_text}")
                     else:
-                        print("Rocket: [No text content in final event]")
+                        print("final_response_text: [No text content in final event]")
 
         except Exception as e:
             print(f"ERROR during agent run: {e}")

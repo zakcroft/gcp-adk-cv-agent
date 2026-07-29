@@ -3,3 +3,7 @@
 .idea/
 __pycache__/
 .DS_Store
+
+.claude/settings.local.json
+.adk/
+.claude/settings.local.json
