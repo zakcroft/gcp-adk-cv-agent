@@ -40,6 +40,44 @@
         "user_id": "test_user",
         "state": {}
       }
+    },
+    {
+      "eval_id": "improve_cv_missing_files",
+      "conversation": [
+        {
+          "invocation_id": "6d786c02-3b46-4a97-a5b1-2e0f2a1c0002",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Please improve my CV for the job description I provided."
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "You have not uploaded any files yet. Please upload your current CV and the target job description so I can improve your CV."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_uploaded_files",
+                "args": {}
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "agents",
+        "user_id": "test_user",
+        "state": {}
+      }
     }
   ]
 }
