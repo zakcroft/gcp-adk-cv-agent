@@ -25,9 +25,11 @@ Multi-agent CV improvement pipeline on Google ADK (Gemini via Vertex AI):
 cv_agent_app (root LlmAgent — tools: list_uploaded_files, load_customer_documents)
 └─ cv_writer_sequential_agent (SequentialAgent)
    ├─ writer_agent (drafts the CV)
-   └─ reviser_loop_agent (LoopAgent, max_iterations=3)
-      ├─ critic_agent (critiques; calls exit_loop to approve/terminate)
-      └─ reviser_agent (applies feedback)
+   ├─ reviser_loop_agent (LoopAgent, max_iterations=3)
+   │  ├─ critic_agent (critiques; calls exit_loop to approve/terminate)
+   │  └─ reviser_agent (applies feedback)
+   └─ cv_presenter_agent (custom BaseAgent, no LLM — emits final cv_draft
+      verbatim as the run's last event; saves artifact improved_cv.md)
 ```
 
 **Data flows through session state, never through hope:** `load_customer_documents` writes `customer_cv` and `job_description` into state; sub-agent instructions inject them via `{placeholder}` templating (strict — missing key raises). The writer saves its output to state key `cv_draft` (via `output_key`); the reviser **also** writes to `cv_draft` so each loop iteration critiques the latest revision; the critic reads it and writes `cv_criticism`. Do not break this producer→consumer chain — the historical bug here was the root agent transferring to the workflow before loading documents, which turned a "please upload your CV" reply into the draft.

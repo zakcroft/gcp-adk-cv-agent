@@ -1,6 +1,7 @@
 from google.adk.agents import Agent, LoopAgent, SequentialAgent
 
 from cv_agents.sub_agents.critic.agent import critic_agent
+from cv_agents.sub_agents.presenter.agent import cv_presenter_agent
 from cv_agents.sub_agents.reviser.agent import reviser_agent
 
 from cv_agents.config import Config
@@ -28,6 +29,6 @@ reviser_loop_agent = LoopAgent(
 
 cv_writer_sequential_agent = SequentialAgent(
     name="cv_writer_sequential_agent",
-    description="CV improvement workflow: Writer → Critic → Reviser loop",
-    sub_agents=[writer_agent, reviser_loop_agent],
+    description="CV improvement workflow: Writer → Critic/Reviser loop → Presenter",
+    sub_agents=[writer_agent, reviser_loop_agent, cv_presenter_agent],
 )

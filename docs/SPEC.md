@@ -29,12 +29,14 @@ English, preserving factual accuracy while tailoring emphasis to the role.
 cv_agent_app (LlmAgent, model gemini-2.5-flash)          cv_agents/agent.py
 │  tools: list_uploaded_files, load_customer_documents   cv_agents/tools.py
 │  instruction: cv_agents/prompt.py (ROOT_INSTRUCTION + GLOBAL_INSTRUCTION)
-│  output_key: final_cv
 └─ cv_writer_sequential_agent (SequentialAgent)          cv_agents/sub_agents/writer/agent.py
    ├─ writer_agent (LlmAgent)      output_key: cv_draft
-   └─ reviser_loop_agent (LoopAgent, max_iterations=3)
-      ├─ critic_agent (LlmAgent)   output_key: cv_criticism, tool: exit_loop
-      └─ reviser_agent (LlmAgent)  output_key: cv_draft   (overwrites!)
+   ├─ reviser_loop_agent (LoopAgent, max_iterations=3)
+   │  ├─ critic_agent (LlmAgent)   output_key: cv_criticism, tool: exit_loop
+   │  └─ reviser_agent (LlmAgent)  output_key: cv_draft   (overwrites!)
+   └─ cv_presenter_agent (custom BaseAgent, NO LLM)      cv_agents/sub_agents/presenter/agent.py
+      emits state `cv_draft` verbatim as the final event; saves it as
+      artifact `improved_cv.md`
 ```
 
 Naming convention: `_agent` suffix = LLM worker; `_sequential_`/`_loop_` = ADK
@@ -52,7 +54,13 @@ workflow containers (no LLM calls of their own). These names are what appear as
 4. `writer_agent` drafts; then the loop runs critic → reviser up to 3 times.
    The critic calls the built-in `exit_loop` tool to approve and terminate
    early (max_iterations is a ceiling, not a quota).
-5. The final revision is the reply; root's `output_key` stores it as `final_cv`.
+5. `cv_presenter_agent` ends every run by emitting the final `cv_draft`
+   verbatim (deterministic, no LLM call) and saving it as artifact
+   `improved_cv.md`. Rationale: once the critic gained `exit_loop`, an
+   approved run's last event was the exit_loop function response — the
+   user-facing reply and the trace's final output stopped being the CV
+   (Langfuse LLM-judges scored "generation is empty"). The presenter makes
+   the last event the CV regardless of how the loop exits.
 
 ### 3.3 Data flow — session state contract
 
@@ -65,7 +73,11 @@ ADK `{placeholder}` templating (strict: missing key ⇒ runtime error, by design
 | `job_description` | `load_customer_documents` | writer, critic, reviser |
 | `cv_draft` | writer_agent AND reviser_agent (output_key) | critic, reviser |
 | `cv_criticism` | critic_agent (output_key) | reviser |
-| `final_cv` | root agent (output_key) | — |
+
+(`final_cv` — a former root-agent `output_key` — was removed: after a
+transfer the root never produced the CV, so the key stored chat text under a
+misleading name. `cv_draft` is the single source of truth; the presenter
+also persists it as the `improved_cv.md` artifact.)
 
 Design rule: **never let critical data depend on conversation-history luck or
 LLM discretion.** Prompts must receive data by injection, not describe data

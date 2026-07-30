@@ -69,5 +69,4 @@ root_agent = Agent(
     instruction=prompt.ROOT_INSTRUCTION,
     sub_agents=[cv_writer_sequential_agent],
     tools=[load_docs_tool, list_files_tool],
-    output_key="final_cv",
 )
