@@ -122,15 +122,23 @@ it before creating clients/instrumentation. Auth is gcloud ADC
 
 ## 5. Observability (Langfuse)
 
-- Self-hosted Langfuse v3 at `http://localhost:3000`; Docker compose project in
-  the sibling directory `../langfuse` (postgres, clickhouse, redis, minio,
-  web, worker).
-- **ClickHouse version pin**: `../langfuse/docker-compose.override.yml` pins
-  ClickHouse to the version that wrote the data volume. NEVER downgrade
-  ClickHouse (e.g. by pulling upstream compose changes): an older server
-  detaches newer-format parts as `broken-on-start` and all traces appear lost.
-  Recovery: run the newer image, strip the `broken-on-start_` prefix on
-  detached part dirs, `ALTER TABLE ... ATTACH PART`.
+- Self-hosted Langfuse **v4** at `http://localhost:3000`; Docker compose
+  project in the sibling directory `../langfuse` (postgres, clickhouse, redis,
+  minio, web, worker). Clean-installed 2026-07-31 (v3 volumes wiped; the old
+  ClickHouse version pin is gone — upstream's pinned image owns the fresh
+  volume, so plain `git pull` + `up -d` is safe again).
+- **Instance is reproducible, not precious**: `../langfuse/.env` holds
+  `LANGFUSE_INIT_*` vars that reseed the same org/project/**API keys** (matching
+  this repo's `.env`) on an empty database — recovery from anything is
+  `docker compose down -v && up -d` + recreating evaluators in the UI.
+- `../langfuse/docker-compose.override.yml` (local-only) does two jobs: mounts
+  gcloud ADC + `GOOGLE_CLOUD_PROJECT` into web AND worker (the
+  `google-vertex-ai` LLM connection resolves ADC server-side; judge evals run
+  in the worker), and mounts `clickhouse-compat.xml`
+  (`query_plan_optimize_lazy_materialization=0`, guards against a ClickHouse
+  optimizer bug that 500'd the Scores tab).
+- No SMTP is configured: password reset / email change / "forgot password" do
+  NOT work — fix accounts via direct `users`-table updates or a reseed.
 - Instrumentation is `GoogleADKInstrumentor().instrument()`; the Langfuse
   client (`get_client()`) MUST be initialized before agents run — it registers
   the OTel exporter; spans emitted before that are silently dropped.
@@ -183,13 +191,19 @@ workflow is pytest + Langfuse traces as the single record.
 
 ## 7. Known gaps / next steps (agreed but not built)
 
-1. **Persist the final CV** — wire `save_generated_file` (or equivalent) so the
-   improved CV lands as an artifact/file the user can retrieve.
+1. ~~Persist the final CV~~ — DONE: `cv_presenter_agent` saves
+   `improved_cv.md` as an artifact and ends every run with the CV text.
 2. **ADK eval scores → Langfuse score objects** — attach
    `tool_trajectory_avg_score` / `response_match_score` to the eval run's trace
    via `langfuse.create_score()` so judgments live next to traces.
-3. **Langfuse LLM-as-a-judge** — online scoring of CV quality (tailoring to
-   job spec, no invented experience) on every trace; configured in Langfuse UI.
+3. **Langfuse LLM-as-a-judge** — partially live: a managed **Relevance**
+   evaluator (observation-level; filter root span — `Is Root Observation =
+   true`, or `Type = CHAIN` — 100% sampling, 30s delay; mappings `query` ←
+   Input `$.new_message.parts[0].text`, `generation` ← Output
+   `$.content.parts[0].text`; judge model `gemini-2.5-flash` via the `google`
+   ADC connection). A fuller suite (Faithfulness, Hallucination, custom
+   Completeness + Job-tailoring, fed via presenter-span metadata) is designed
+   but not yet spec'd/built — see brainstorm in progress.
 4. **User-simulation evals** — ADK `ConversationScenario` (persona +
    conversation_plan) for multi-turn robustness; experimental in ADK 1.17.
 5. Consider making `max_iterations` and models configurable via `Config`.
