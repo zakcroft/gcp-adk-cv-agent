@@ -110,7 +110,8 @@ renders as `<not serializable>`).
 ```
 GOOGLE_GENAI_USE_VERTEXAI=1
 GOOGLE_CLOUD_PROJECT=...          # Vertex AI project
-GOOGLE_CLOUD_LOCATION=europe-west4
+GOOGLE_CLOUD_LOCATION=global   # global routes to available capacity; regional
+                               # endpoints (europe-west4) 429 under call bursts
 LANGFUSE_PUBLIC_KEY=pk-lf-...     # local Langfuse project keys
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_BASE_URL=http://localhost:3000
@@ -152,7 +153,38 @@ it before creating clients/instrumentation. Auth is gcloud ADC
 
 ## 6. Evaluation
 
-Two complementary layers (see also `docs/superpowers/specs/2026-07-16-adk-trajectory-eval-design.md`):
+Three complementary layers (see also
+`docs/superpowers/specs/2026-07-16-adk-trajectory-eval-design.md` and
+`docs/superpowers/specs/2026-07-31-eval-suite-design.md`).
+
+**The two-lane model** (Langfuse side):
+- **Lane 1 — regression (code):** `scripts/run_dataset_experiment.py` runs the
+  REAL pipeline over Langfuse dataset `regression-cases` (items = input +
+  expected gold CV) and scores each item with an in-code LLM judge → score
+  `correctness` ("does output match the known-good answer?"). The judge prompt
+  is shared via Langfuse Prompt Management: `correctness-judge`, label
+  `production`; each score records `judge_prompt_version`. Run:
+  `uv run python scripts/run_dataset_experiment.py [dataset] [run-name]` —
+  name runs after WHAT CHANGED (like a commit message); runs carry
+  `metadata.source=code`. UI "prompt experiments" over the same dataset are
+  prompt+model only (cannot run the pipeline) — for prompt play, not testing.
+- **Lane 2 — live (UI):** observation evaluator, score `relevance` ("does the
+  reply address what was asked?"), managed Relevance template, judge
+  `gemini-2.5-flash` via the `google` ADC connection. Filters:
+  `Is Root Observation = true` AND environment NOT IN the six internal envs
+  (critical: without the env exclusion it mis-judges experiment traces — the
+  root span there is the SDK wrapper, not the ADK invocation).
+
+Naming rules (all names are load-bearing — filters/dashboards match on
+strings): scores = the question asked (`relevance`, `correctness`); datasets =
+purpose (`regression-cases`); prompts = role (`correctness-judge`); run names
+= what changed. Traffic sources: `user_1` (chat), `test_user` (pytest),
+`experiment_user` (experiments); environments partition automatically
+(`default` / `sdk-experiment` / `langfuse-llm-as-a-judge`).
+
+v4 note: an experiment run has no storage of its own — it is `experiment_*`
+labels stamped on its traces' events. Deleting a run = deleting its traces
+(no UI for this yet; use `DELETE /api/public/traces`).
 
 ### 6.1 ADK evalset — `tests/eval/data/cv_agent.evalset.json`
 
@@ -196,22 +228,39 @@ workflow is pytest + Langfuse traces as the single record.
 2. **ADK eval scores → Langfuse score objects** — attach
    `tool_trajectory_avg_score` / `response_match_score` to the eval run's trace
    via `langfuse.create_score()` so judgments live next to traces.
-3. **Langfuse LLM-as-a-judge** — partially live: a managed **Relevance**
-   evaluator (observation-level; filter root span — `Is Root Observation =
-   true`, or `Type = CHAIN` — 100% sampling, 30s delay; mappings `query` ←
-   Input `$.new_message.parts[0].text`, `generation` ← Output
-   `$.content.parts[0].text`; judge model `gemini-2.5-flash` via the `google`
-   ADC connection). A fuller suite (Faithfulness, Hallucination, custom
-   Completeness + Job-tailoring, fed via presenter-span metadata) is designed
-   but not yet spec'd/built — see brainstorm in progress.
-4. **User-simulation evals** — ADK `ConversationScenario` (persona +
+3. **Eval suite** — both lanes live (§6): `relevance` (UI, live) +
+   `correctness` (code, experiments). Config snapshot for recreating the UI
+   evaluator after a reseed: filter `Is Root Observation = true` + env
+   exclusions, 100% sampling, 30s delay, mappings `query` ← Input
+   `$.new_message.parts[0].text`, `generation` ← Output
+   `$.content.parts[0].text`. NEXT: the four truthfulness judges
+   (Faithfulness, Hallucination, Completeness, Job-tailoring) per
+   `2026-07-31-eval-suite-design.md` — needs the presenter-metadata spike.
+4. **Investigate `correctness` = 0.5** — both scored runs report the same
+   regressions vs the gold CV (job title downgraded, tailoring lost, skills
+   disorganised). Determine: real pipeline weakness vs over-fitted single gold
+   item vs run variance. The learning loop: read judge reasons → tweak
+   writer/reviser prompts → rerun experiment with a change-named run → compare.
+5. **Grow `regression-cases`** — 1 item today. Add no-files cases + more
+   CV/JD pairs; optionally sync from `cv_agent.evalset.json` via a small SDK
+   script so one source feeds both pytest evals and experiments.
+6. **Delete junk experiment runs** — `run-20260731_135205/_142919/_143527`
+   (429 casualties + unscored first run); v4 has no UI delete, use
+   `DELETE /api/public/traces` on their trace ids. Owner go-ahead pending.
+7. **User-simulation evals** — ADK `ConversationScenario` (persona +
    conversation_plan) for multi-turn robustness; experimental in ADK 1.17.
-5. Consider making `max_iterations` and models configurable via `Config`.
-6. **Migrate to ADK 2.0** (GA since 2026-05-19; currently on 1.17). Breaking:
-   agents become graph nodes (`BaseNode`), event schema changes. Verify impact
-   on LoopAgent/SequentialAgent, `output_key`, `{placeholder}` templating,
-   `AgentEvaluator`, and the openinference instrumentation before upgrading.
-   Do it on a branch with both eval tests as the safety net.
+8. Consider making `max_iterations` and models configurable via `Config`.
+9. **Migrate to ADK 2.x** — see
+   `docs/superpowers/specs/2026-07-29-adk-v2-upgrade-assessment.md`:
+   recommended two-step 1.17 → 1.36.x now, 2.x once
+   `openinference-instrumentation-google-adk` supports it. Both eval lanes are
+   the safety net for the migration itself.
+10. **Presenter phase 2** — transfer back to root after presenting so the
+    user can discuss/iterate the CV; re-target the live evaluator when the
+    final event becomes chat again (see presenter design discussion).
+11. **ADK eval scores → Langfuse scores** — attach
+    `tool_trajectory_avg_score` / `response_match_score` via
+    `langfuse.create_score()` so pytest judgments live next to traces.
 
 ## 8. Conventions
 

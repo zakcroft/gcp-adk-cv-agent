@@ -11,6 +11,7 @@ uv run main.py                                # run the interactive chat app (ty
 uv run pytest tests/eval/test_trajectory.py   # ADK evalset (trajectory + response match)
 uv run pytest tests/eval/test_improve_cv_flow.py  # happy-path integration test (full pipeline)
 uv run adk web                                # ADK dev UI (browser) — root_agent is exposed by cv_agents
+uv run python scripts/run_dataset_experiment.py [dataset] [run-name]  # regression run over Langfuse dataset + correctness judge
 ```
 
 - Run the two eval test files **separately**, not as one `pytest tests/eval/` run: together they burst ~12 Gemini calls and trip Vertex AI 429 quota. A 429 is quota, not a bug — re-run after a minute.
