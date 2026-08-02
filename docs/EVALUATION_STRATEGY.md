@@ -136,3 +136,17 @@ Next (detailed in the build plan):
 4. Runner: per-case documents, `--run-name` flag.
 5. Later (SPEC section 7): pytest env separation, ADK scores → Langfuse
    scores, user-simulation evals, ADK 2.x migration.
+
+## 8. Advanced considerations
+
+Agent evaluation extends beyond output quality into memory, tool use,
+planning, multi-agent coordination, and human-agent interaction. Status of
+each here — revisit when the trigger fires:
+
+| Dimension | Status | Trigger to revisit |
+|---|---|---|
+| Tool use (selection, ordering, success rate) | Covered — ADK trajectory eval (exact match, load-before-transfer) | — |
+| Multi-agent coordination (alignment, error propagation) | Implicit — state-chain assertions in the integration test | Critic-agreement meta-eval once judge history accumulates |
+| Human-agent interaction (turn-to-repair, over/under-questioning) | Not yet relevant | Presenter phase 2 (post-delivery discussion loop) |
+| Planning (goal achievement, plan feasibility) | Not applicable — fixed Sequential/Loop workflow, no dynamic planning | Pipeline gains dynamic routing (e.g. ADK 2.x graphs) |
+| Memory management (recall, compression, forgetting) | Not applicable — single-session in-memory state | Persistent sessions / long-term memory added |
