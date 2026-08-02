@@ -1,7 +1,7 @@
 # CV Agent — Application Specification
 
 Complete specification of the app for anyone (human or agent) picking it up fresh.
-Last updated: 2026-07-29.
+Last updated: 2026-08-02.
 
 ## 1. Purpose
 
@@ -18,7 +18,7 @@ English, preserving factual accuracy while tailoring emphasis to the role.
 | LLM | Gemini 2.5 Flash via **Vertex AI** (project/location from `.env`) |
 | Package/run | `uv` (Python ≥ 3.10; venv at `.venv`) |
 | Config | `pydantic-settings` reading `.env` (`cv_agents/config.py`, env prefix `GOOGLE_`, Langfuse keys via `validation_alias`) |
-| Observability | Langfuse v3 (self-hosted, Docker) + `openinference-instrumentation-google-adk` |
+| Observability | Langfuse v4 (self-hosted, Docker) + `openinference-instrumentation-google-adk` |
 | Evals | ADK evalsets + pytest (`AgentEvaluator`), plus a custom integration test |
 
 ## 3. Architecture
@@ -100,8 +100,9 @@ renders as `<not serializable>`).
 - `InMemorySessionService` + `InMemoryArtifactService`: all state/artifacts are
   lost when the process exits. Each `main.py` run is genuinely a new session
   (`SESSION_ID = session_<timestamp>` so Langfuse groups per run).
-- Known gap: the final CV is never persisted anywhere (no output artifact, no
-  file). `tools.save_generated_file` exists but is unused. See §7.
+- The final CV is persisted by `cv_presenter_agent` as artifact
+  `improved_cv.md` (in-memory service, so per-process like everything else).
+  `tools.save_generated_file` remains unused.
 
 ## 4. Configuration
 
@@ -228,7 +229,7 @@ workflow is pytest + Langfuse traces as the single record.
 2. **ADK eval scores → Langfuse score objects** — attach
    `tool_trajectory_avg_score` / `response_match_score` to the eval run's trace
    via `langfuse.create_score()` so judgments live next to traces.
-3. **Eval suite** — both lanes live (§6): `relevance` (UI, live) +
+3. **Eval suite** — both lanes live (section 6): `relevance` (UI, live) +
    `correctness` (code, experiments). Config snapshot for recreating the UI
    evaluator after a reseed: filter `Is Root Observation = true` + env
    exclusions, 100% sampling, 30s delay, mappings `query` ← Input
@@ -241,9 +242,18 @@ workflow is pytest + Langfuse traces as the single record.
    disorganised). Determine: real pipeline weakness vs over-fitted single gold
    item vs run variance. The learning loop: read judge reasons → tweak
    writer/reviser prompts → rerun experiment with a change-named run → compare.
-5. **Grow `regression-cases`** — 1 item today. Add no-files cases + more
-   CV/JD pairs; optionally sync from `cv_agent.evalset.json` via a small SDK
-   script so one source feeds both pytest evals and experiments.
+5. **Grow `regression-cases`** — 1 item today (gold hand-curated 2026-08-01:
+   fabrications stripped, titles kept honest — every fact grounded in the
+   original CV; golds must pass the same faithfulness bar as the pipeline).
+   Claude drafts the new CV/JD pairs + golds; owner reviews. Planned cases:
+   - 2–3 CV/JD pairs across industries and seniority levels
+   - a sparse CV (little to work with — does the pipeline invent to
+     compensate? the fabrication problem as a test case)
+   - a mismatched CV/JD pair (does tailoring stay honest?)
+   - no-files cases (gold = the "please upload" reply; reuse
+     `cv_agent.evalset.json` wording)
+   Prereq for multi-pair items: items must carry/name their own documents and
+   the runner must load them per item (today it always loads the sample pair).
 6. **Delete junk experiment runs** — `run-20260731_135205/_142919/_143527`
    (429 casualties + unscored first run); v4 has no UI delete, use
    `DELETE /api/public/traces` on their trace ids. Owner go-ahead pending.

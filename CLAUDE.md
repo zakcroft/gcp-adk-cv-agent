@@ -46,5 +46,5 @@ Tools return `.model_dump()` dicts (not Pydantic objects) so Langfuse tool spans
 ## Gotchas
 
 - Prompt/agent edits require restarting the running chat process; instructions are loaded at import time.
-- The Langfuse instance (v4, clean-installed 2026-07-31) is disposable-and-reproducible: `../langfuse/.env` reseeds the same org/project/API keys on an empty DB (`docker compose down -v && up -d`); evaluators must be recreated in the UI (config snapshot in SPEC §7, item 3). The override file only mounts Vertex ADC credentials + a ClickHouse compat setting — no version pins remain.
+- The Langfuse instance (v4, clean-installed 2026-07-31) is disposable-and-reproducible: `../langfuse/.env` reseeds the same org/project/API keys on an empty DB (`docker compose down -v && up -d`); evaluators must be recreated in the UI (config snapshot in SPEC section 7, item 3). The override file only mounts Vertex ADC credentials + a ClickHouse compat setting — no version pins remain.
 - This is a personal project (github.com/zakcroft). Never `git push` or delete files unless explicitly asked.

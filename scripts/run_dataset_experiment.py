@@ -118,7 +118,9 @@ async def correctness_judge(*, input, output, expected_output, metadata=None, **
     client = genai.Client()
     response = client.models.generate_content(
         model=config.agent_settings.model,
-        contents=judge_prompt.compile(expected=expected_output, produced=output),
+        contents=judge_prompt.compile(
+            query=str(input), expected=expected_output, produced=output
+        ),
         config={"response_mime_type": "application/json"},
     )
     verdict = json.loads(response.text)

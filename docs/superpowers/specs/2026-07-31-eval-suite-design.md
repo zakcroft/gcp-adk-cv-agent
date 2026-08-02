@@ -47,7 +47,7 @@ Every live run gets judged automatically. One evaluator per failure mode; core r
 1. ~~v4 install~~ DONE 2026-07-31: clean install, org/project reseeded with the
    SAME keys (`.env` unchanged, no 401), Vertex connection recreated via API
    (ADC, location `global`). Remaining: recreate #5 in the UI (config snapshot
-   in SPEC.md §7 item 3).
+   in SPEC.md section 7 item 3).
 2. Spike: metadata variant 1, one run, inspect span; else variant 2.
 3. Presenter metadata change, TDD (`tests/unit/test_presenter_agent.py`). Extends the committed presenter (`f46fb12`).
 4. Create #1–#4 in UI; verify each variable preview shows real text.

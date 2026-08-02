@@ -7,3 +7,5 @@ __pycache__/
 .claude/settings.local.json
 .adk/
 .claude/.spec-reminder-hash
+
+docs/superpowers/files
