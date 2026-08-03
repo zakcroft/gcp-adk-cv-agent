@@ -125,6 +125,7 @@ GOOGLE_CLOUD_LOCATION=global   # global routes to available capacity; regional
 LANGFUSE_PUBLIC_KEY=pk-lf-...     # local Langfuse project keys
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_BASE_URL=http://localhost:3000
+LANGFUSE_TRACING_ENVIRONMENT="local"  # environment stamped on app traces
 ```
 
 `Config.setup_environment()` exports these for google-genai and Langfuse; call
@@ -154,9 +155,18 @@ it before creating clients/instrumentation. Auth is gcloud ADC
   client (`get_client()`) MUST be initialized before agents run — it registers
   the OTel exporter; spans emitted before that are silently dropped.
 - Who traces what:
-  - `main.py` → app runs, user `user_1`, session `session_<timestamp>`
-  - `tests/eval/conftest.py` → eval runs, user `test_user`, sessions
-    `___eval___session___<uuid>` (distinguishable in the UI by User ID)
+  - `main.py` → app runs, user `user_1`, session `session_<timestamp>`,
+    environment `local` (`LANGFUSE_TRACING_ENVIRONMENT` in `.env`, exported
+    by `Config.setup_environment()` via setdefault so the pytest conftest
+    wins)
+  - ALL pytest runs → environment `pytest` (`tests/conftest.py` sets
+    `LANGFUSE_TRACING_ENVIRONMENT` before imports — needed because importing
+    cv_agents initialises the Langfuse client for prompt fetching, so even
+    unit tests emit traces); eval runs additionally use user `test_user`,
+    sessions `___eval___session___<uuid>`
+  - experiments → environment `sdk-experiment`, user `experiment_user`
+  - Live evaluators filter environment `any of: local` (include, never
+    exclude — new/internal environments then cannot leak in).
 - Trace anatomy: `invocation` → `agent_run [name]` → `call_llm` / tool spans.
   Tool results return to the model as `function_response` messages — visible in
   the NEXT `call_llm`'s input. Workflow-agent spans never have own `call_llm`s.

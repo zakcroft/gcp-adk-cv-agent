@@ -122,7 +122,7 @@ Decided by one question: **does the judge need ground truth?**
   (one evaluator binding, no environment filter) — dev and prod scores stay
   directly comparable.
 - Expected output-based judges are dev-only by nature; their prod counterpart is the
-  source-document judges plus user signals.
+  source-document judges plus user feedback.
 - Never fork a judge's definition between surfaces. Different criteria =
   new judge with a new name.
 

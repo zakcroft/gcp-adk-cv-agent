@@ -25,11 +25,22 @@ def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
     # Keep a reference: an unreferenced Client can be garbage-collected
     # mid-call, closing its connection pool ("client has been closed").
     client = genai.Client()
-    response = client.models.generate_content(
-        model=config.agent_settings.model,
-        contents=prompt.compile(**variables),
-        config={"response_mime_type": "application/json"},
-    )
+    response = None
+    for attempt, delay in enumerate((20, 45, 90, None)):
+        try:
+            response = client.models.generate_content(
+                model=config.agent_settings.model,
+                contents=prompt.compile(**variables),
+                config={"response_mime_type": "application/json"},
+            )
+            break
+        except Exception as e:
+            if "429" not in str(e) or delay is None:
+                raise
+            logger.warning(f"{score_name} judge 429 (attempt {attempt + 1}); retrying in {delay}s")
+            import time
+
+            time.sleep(delay)
     verdict = json.loads(response.text)
     return Evaluation(
         name=score_name,

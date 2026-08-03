@@ -1,6 +1,7 @@
 """hallucination — implied claims beyond the original CV (framing that
 suggests seniority/scale/expertise the original never states). Cross-checks
-faithfulness from a different angle; disagreement between them is signal.
+faithfulness from a different angle; when the two disagree, the run is
+worth a manual look.
 
 Skips no-files items.
 """

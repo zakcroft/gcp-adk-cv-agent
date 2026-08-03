@@ -1,0 +1,15 @@
+Tom Okafor
+Graduate Software Developer
+tom.okafor@email.com | +44 7700 900456 | Bristol, UK
+
+EDUCATION
+BSc Computer Science | University of Bristol | 2022 - 2025
+Graduated with 2:1 honours
+
+EXPERIENCE
+Software Engineering Intern | Meridian Systems | Bristol | Jun - Sep 2024
+• Fixed bugs in a Java web application
+• Wrote unit tests
+
+SKILLS
+Java, Python, Git, SQL basics

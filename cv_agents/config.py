@@ -42,6 +42,9 @@ class Config(BaseSettings):
     LANGFUSE_BASE_URL: str = Field(
         default="https://cloud.langfuse.com", validation_alias="LANGFUSE_BASE_URL"
     )
+    LANGFUSE_TRACING_ENVIRONMENT: str = Field(
+        default="local", validation_alias="LANGFUSE_TRACING_ENVIRONMENT"
+    )
 
     def setup_environment(self) -> None:
         """Export settings as the environment variables google-genai and Langfuse expect."""
@@ -59,5 +62,9 @@ class Config(BaseSettings):
             os.environ["LANGFUSE_PUBLIC_KEY"] = self.LANGFUSE_PUBLIC_KEY
             os.environ["LANGFUSE_SECRET_KEY"] = self.LANGFUSE_SECRET_KEY
             os.environ["LANGFUSE_BASE_URL"] = self.LANGFUSE_BASE_URL
+            # setdefault: tests/conftest.py pre-sets "pytest" and must win
+            os.environ.setdefault(
+                "LANGFUSE_TRACING_ENVIRONMENT", self.LANGFUSE_TRACING_ENVIRONMENT
+            )
         else:
             logger.info("Langfuse keys not set; skipping Langfuse configuration")

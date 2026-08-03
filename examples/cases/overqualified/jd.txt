@@ -1,0 +1,21 @@
+Support Engineer (Junior)
+NorthBridge SaaS — Edinburgh, UK (office-based)
+
+About the role
+NorthBridge provides scheduling software for healthcare providers. Our
+support engineers investigate customer-reported issues, reproduce bugs, and
+work with the development team to get them fixed.
+
+Responsibilities
+• Investigate and triage customer-reported technical issues
+• Reproduce bugs and write clear reports for the development team
+• Run SQL queries to investigate data issues
+• Write and update support documentation
+• Escalate incidents and communicate status to customers
+
+Requirements
+• Some experience with SQL and reading application logs
+• A methodical approach to troubleshooting
+• Clear written communication
+• Basic scripting ability (Python or similar) is a plus
+• Patience and a customer-first attitude

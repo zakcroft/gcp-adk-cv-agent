@@ -1,0 +1,41 @@
+Elena Marsh
+Staff Software Engineer
+elena.marsh@email.com | +44 7700 900789 | Edinburgh, UK
+LinkedIn: linkedin.com/in/elenamarsh | GitHub: github.com/emarsh
+
+PROFESSIONAL SUMMARY
+Staff engineer with 12 years of experience building and operating
+distributed systems. Led the platform team at Caldora through a migration
+that cut infrastructure costs by 35%. Regular incident commander and
+mentor.
+
+EXPERIENCE
+
+Staff Software Engineer | Caldora | Edinburgh, UK | Jan 2019 - Present
+• Led a platform team of 6 engineers running Kubernetes-based services
+• Drove a cloud migration that cut infrastructure costs by 35%
+• Designed the event pipeline handling 40,000 messages per second
+• Acted as incident commander for major outages; wrote the postmortem
+  process now used company-wide
+• Mentored 9 engineers, 4 promoted to senior
+
+Senior Software Engineer | Fenwick Digital | Glasgow, UK | May 2014 - Dec 2018
+• Built REST APIs in Go and Python for retail clients
+• Introduced automated testing that cut regression bugs by half
+• Ran weekly design reviews for a team of 8
+
+Software Engineer | ClydeSoft | Glasgow, UK | Jul 2012 - Apr 2014
+• Developed internal tools in Python
+• Maintained PostgreSQL databases
+
+EDUCATION
+
+MEng Software Engineering | University of Edinburgh | 2007 - 2012
+• First-class honours
+
+SKILLS
+
+Languages: Go, Python, SQL
+Infrastructure: Kubernetes, AWS, Terraform, Docker
+Data: PostgreSQL, Kafka, Redis
+Practices: incident response, mentoring, design reviews, on-call leadership
