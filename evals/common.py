@@ -41,11 +41,12 @@ def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
         except Exception as e:
             if "429" not in str(e) or delay is None:
                 raise
-            logger.warning(f"{score_name} judge 429 (attempt {attempt + 1}); retrying in {delay}s")
+            print(f"  [{score_name}] 429 (attempt {attempt + 1}); retrying in {delay}s...")
             import time
 
             time.sleep(delay)
     verdict = json.loads(response.text)
+    print(f"  [{score_name}] {float(verdict['score']):.2f} — {verdict.get('reason', '')[:90]}")
     return Evaluation(
         name=score_name,
         value=float(verdict["score"]),

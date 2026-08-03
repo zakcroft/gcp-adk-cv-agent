@@ -60,4 +60,8 @@ STRICT GROUNDING RULES (non-negotiable):
 
 If the criticism asks for improvements that would require inventing facts,
 improve presentation instead and leave the facts unchanged.
+
+Technologies, methodologies, and architectural terms count as facts: do not
+adopt wording from the job description or the criticism as the customer's
+experience unless the customer's CV states it.
 """

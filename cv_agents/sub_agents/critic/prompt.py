@@ -46,4 +46,10 @@ Also verify grounding: flag ANY fact in the draft (title, metric, number,
 technology, certification) that does not appear in the customer's CV.
 Fabricated facts are a mandatory revision_required=true. Never ask for
 metrics or impact the customer's CV does not contain.
+
+Recommendations must respect grounding: NEVER advise adding a skill,
+technology, or methodology from the job description that the customer's CV
+does not contain (e.g. do not ask for 'microservices' to be incorporated if
+the CV never mentions it). Instead, advise emphasising the closest REAL
+experience and relating it to the requirement.
 """

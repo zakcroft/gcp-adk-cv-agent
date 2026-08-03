@@ -13,10 +13,11 @@ async def tailoring(*, input, output, expected_output=None, metadata=None, **kwa
     docs = source_documents(input)
     if docs is None:
         return []
-    _, job_description = docs
+    customer_cv, job_description = docs
     return judge(
         "tailoring",
         "tailoring-judge",
+        customer_cv=customer_cv,
         job_description=job_description,
         produced=str(output),
     )

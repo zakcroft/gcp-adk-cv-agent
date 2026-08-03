@@ -88,6 +88,7 @@ async def run_pipeline(question: str) -> str:
 
 async def task(*, item, **kwargs) -> str:
     question = item.input if isinstance(item.input, str) else str(item.input)
+    print(f"\n=== item {item.id}: running pipeline...")
     # Vertex uses shared quota: bursts can 429 transiently. Retry with backoff
     # instead of failing the item (a 429 means "not this second", not "no").
     delays = (30, 60, 120)
