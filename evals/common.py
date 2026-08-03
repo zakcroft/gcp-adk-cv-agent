@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).parent.parent
 config = Config()
 
+# Judges use the lite model: cheaper, and halves contention on the shared
+# Vertex quota that 429s the pipeline's own calls.
+JUDGE_MODEL = "gemini-2.5-flash-lite"
+
 
 def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
     """Run one LLM judge: fetch its prompt (label `production`), call Gemini,
@@ -29,7 +33,7 @@ def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
     for attempt, delay in enumerate((20, 45, 90, None)):
         try:
             response = client.models.generate_content(
-                model=config.agent_settings.model,
+                model=JUDGE_MODEL,
                 contents=prompt.compile(**variables),
                 config={"response_mime_type": "application/json"},
             )
