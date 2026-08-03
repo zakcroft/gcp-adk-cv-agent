@@ -1,6 +1,6 @@
 #!/bin/bash
 # Stop hook: when the working tree has meaningful code changes, prompt Claude
-# (once per distinct change-set) to check whether docs/SPEC.md needs updating.
+# (once per distinct change-set) to check whether SPEC.md needs updating.
 
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$repo_root" || exit 0
@@ -20,6 +20,6 @@ cache="$repo_root/.claude/.spec-reminder-hash"
 echo "$diff_hash" > "$cache"
 
 cat <<'EOF'
-{"decision": "block", "reason": "Spec check: this working tree has changes in cv_agents/, main.py or tests/. Review whether docs/SPEC.md needs updating to stay accurate (agent tree, state keys, eval cases, config, known gaps). If the change is meaningful, update SPEC.md now; if not, briefly say so and finish. You will not be reminded again for this exact change-set."}
+{"decision": "block", "reason": "Spec check: this working tree has changes in cv_agents/, main.py or tests/. Review whether SPEC.md needs updating to stay accurate (agent tree, state keys, eval cases, config, known gaps). If the change is meaningful, update SPEC.md now; if not, briefly say so and finish. You will not be reminded again for this exact change-set."}
 EOF
 exit 0

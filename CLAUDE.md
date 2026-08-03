@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Read `docs/SPEC.md` first** — it is the full specification of the app (architecture, data flow, eval strategy, observability stack, known constraints) and is the fastest way to pick this project up from scratch.
+**Read `SPEC.md` first** — it is the full specification of the app (architecture, data flow, eval strategy, observability stack, known constraints) and is the fastest way to pick this project up from scratch.
 
 ## Commands
 

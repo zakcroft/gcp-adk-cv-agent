@@ -33,13 +33,19 @@ What a good run is, ranked; the first is non-negotiable:
 1. **Truthful** — every fact in the improved CV exists in the customer's CV.
    No invented metrics, titles, technologies, or responsibilities. (Known
    failure mode: the pipeline currently fabricates — correctness 0.1 against
-   the honest gold, 2026-08-01.)
-2. **Complete** — nothing material from the customer's CV silently dropped.
+   the ground truths.)
+2. **Complete** — nothing material from the customer's CV missing.
 3. **Tailored** — the job description's key requirements addressed with
    grounded evidence from real experience.
-4. **Well-behaved conversation** — checks uploaded files before claiming or
+4. **Rounded** — not solely shaped by the JD: skills from the CV that are
+   not relevant to the role are still included, just never as the main
+   focus.
+5. **Honest about fit** — when the CV materially mismatches the role's key
+   requirements, the user is told so, briefly and candidly, alongside the
+   improved CV. Tailoring must never disguise a weak fit.
+6. **Well-behaved conversation** — checks uploaded files before claiming or
    transferring; helpful no-files replies.
-5. **Cost/latency** — monitored via Langfuse run charts; no hard thresholds
+7. **Cost/latency** — monitored via Langfuse run charts; no hard thresholds
    at this scale.
 
 The pipeline is non-deterministic (two runs invented *different* fake
@@ -56,8 +62,8 @@ AND fabricated) — so each criterion gets its own scored, repeatable check.
 
 One judge per failure mode: `correctness` (vs gold, in code), `relevance`
 (live), and — being built — `faithfulness` + `hallucination` (invention),
-`completeness` (omission), `tailoring` (missing the point), fed by
-presenter-span metadata.
+`completeness` (omission), `tailoring` (missing the point), and
+`fit-disclosure` (weak fit not disclosed), fed by presenter-span metadata.
 
 ## 3. Keep judges as versioned instruments
 

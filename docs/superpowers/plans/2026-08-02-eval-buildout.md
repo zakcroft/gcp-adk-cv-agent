@@ -367,7 +367,7 @@ Expected: `faithfulness-judge`, `completeness-judge`, `tailoring-judge` each wit
 ### Task 5: Four UI evaluators on the presenter span (dev + prod in one binding)
 
 **Files:**
-- No repo files — Langfuse UI configuration (Zak drives the UI; implementer supplies exact values and verifies results). Config recorded in SPEC by Task 8.
+- No repo files — Langfuse UI configuration (Zak drives the UI; implementer supplies exact values and verifies results). Config recorded in SPEC by Task 9.
 
 **Interfaces:**
 - Consumes: Task 3's metadata keys; Task 4's prompt texts.
@@ -635,23 +635,92 @@ git commit -m "runner: per-case documents, no-files items, --run-name flag"
 
 ---
 
-### Task 8: Documentation reconciliation
+### Task 8: Fit disclosure — behaviour and judge
 
 **Files:**
-- Modify: `docs/SPEC.md` (section 6 two-lane model → add the four judges + their config snapshot, dataset item shape, case library; section 7 mark items 1/2/5 done)
-- Modify: `docs/EVALUATION_STRATEGY.md` (section 4 planned additions → live; section 10 tick 1–3)
+- Modify: `cv_agents/sub_agents/writer/prompt.py` (fit note instruction)
+- Modify: `cv_agents/sub_agents/presenter/agent.py` + `tests/unit/test_presenter_agent.py` (pass note through)
+- No repo files for the judge: one Langfuse prompt + one UI evaluator.
+
+**Interfaces:**
+- Consumes: Task 3's metadata mechanism, Task 5's evaluator pattern.
+- Produces: state key `fit_note` (writer, may be empty); presenter emits it after the CV as a separate paragraph and adds metadata key `fit_note`; score `fit-disclosure`.
+
+- [ ] **Step 1: Writer assesses fit.** Append to `WRITER_INSTRUCTION` (after the grounding rules):
+
+```
+FIT ASSESSMENT:
+After the CV, on a new line starting exactly "FIT NOTE:", add one candid
+sentence ONLY IF the customer's CV materially lacks the role's key
+requirements (missing core skills, seniority gap, wrong domain). If the fit
+is reasonable, do not add a fit note at all. Never soften the CV itself to
+justify the note.
+```
+
+- [ ] **Step 2: Presenter splits the note.** TDD in `tests/unit/test_presenter_agent.py`: `cv_draft` containing a `FIT NOTE:` line → presenter emits CV text and the note as the final paragraph, sets metadata key `fit_note`; no line → no note, no metadata key. Implement by splitting on `\nFIT NOTE:` in `_run_async_impl`.
+
+- [ ] **Step 3: Judge prompt `fit-disclosure-judge` v1** (Prompt Management, label `production`), variables `{{customer_cv}}`, `{{job_description}}`, `{{produced}}`:
+
+```
+You are checking whether a CV service was honest about job fit.
+
+Compare the CUSTOMER'S ORIGINAL CV against the JOB DESCRIPTION. Decide if
+there is a MATERIAL mismatch: core required skills absent from the CV, a
+clear seniority gap, or a different domain. Then check the PRODUCED output.
+
+Score:
+- 1.0: material mismatch AND the output includes a candid fit note naming
+  the real gaps (or: no material mismatch and no note — also 1.0)
+- 0.5: mismatch disclosed but vague or buried
+- 0.0: material mismatch with no disclosure, or a note that misstates the
+  gaps
+
+ORIGINAL CV:
+{{customer_cv}}
+
+JOB DESCRIPTION:
+{{job_description}}
+
+PRODUCED OUTPUT:
+{{produced}}
+
+Reply with ONLY a JSON object: {"score": <float>, "reason": "<one sentence>"}
+```
+
+- [ ] **Step 4: UI evaluator `fit-disclosure`** — same binding as Task 5's table (presenter span, no env filter, same mappings, `{{produced}}` ← Output `$.content.parts[0].text`).
+
+- [ ] **Step 5: Verify on the two fixture cases.** Run `career-switch` (expects a note) and `senior-match` (expects none) via the runner; check both score 1.0 and the reasons cite the right gaps:
+
+```bash
+uv run python scripts/run_dataset_experiment.py regression-cases --run-name fit-disclosure-check
+```
+
+- [ ] **Step 6: Commit (with Zak's go):**
+
+```bash
+git add cv_agents/sub_agents/writer/prompt.py cv_agents/sub_agents/presenter/agent.py tests/unit/test_presenter_agent.py
+git commit -m "writer discloses weak job fit; presenter surfaces the note; fit-disclosure judge"
+```
+
+---
+
+### Task 9: Documentation reconciliation
+
+**Files:**
+- Modify: `SPEC.md` (section 6 two-lane model → add the four judges + their config snapshot, dataset item shape, case library; section 7 mark items 1/2/5 done)
+- Modify: `EVALUATION_STRATEGY.md` (section 4 planned additions → live; section 10 tick 1–3)
 - Modify: `CLAUDE.md` (runner command line gains `--run-name`)
 
 **Interfaces:** none — text only. Follow the terse style (tables + bullets).
 
 - [ ] **Step 1: Update the three files** to match what shipped (exact evaluator configs from Task 5's table, item input shape from Task 6, scenario inventory as the now-current dataset contents).
 
-- [ ] **Step 2: Self-check** — grep the docs for the old claims: `grep -n 'sample_cv.txt\|positional\|planned' docs/SPEC.md docs/EVALUATION_STRATEGY.md CLAUDE.md` and reconcile hits.
+- [ ] **Step 2: Self-check** — grep the docs for the old claims: `grep -n 'sample_cv.txt\|positional\|planned' SPEC.md EVALUATION_STRATEGY.md CLAUDE.md` and reconcile hits.
 
 - [ ] **Step 3: Commit (with Zak's go):**
 
 ```bash
-git add docs/SPEC.md docs/EVALUATION_STRATEGY.md CLAUDE.md
+git add SPEC.md EVALUATION_STRATEGY.md CLAUDE.md
 git commit -m "update spec and strategy for the four-judge eval suite"
 ```
 
