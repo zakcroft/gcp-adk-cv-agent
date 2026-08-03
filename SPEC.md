@@ -244,9 +244,23 @@ workflow is pytest + Langfuse traces as the single record.
 
 1. ~~Persist the final CV~~ — DONE: `cv_presenter_agent` saves
    `improved_cv.md` as an artifact and ends every run with the CV text.
-2. **ADK eval scores → Langfuse score objects** — attach
-   `tool_trajectory_avg_score` / `response_match_score` to the eval run's trace
-   via `langfuse.create_score()` so judgments live next to traces.
+
+2. **Guardrails** — checks that block or repair at runtime (judges only
+   measure after the fact). Planned:
+   - Input: uploaded files are plausibly a CV and a JD (type, size, sanity)
+     — code + small LLM check before `load_customer_documents` succeeds.
+   - Input: prompt-injection defence — document content is data, never
+     instructions; explicit rule in agent instructions + an injection test
+     case in `regression-cases`.
+   - Scope: root agent declines non-CV requests (instruction now;
+     out-of-scope live evaluator later).
+   - Output: grounding gate — deterministic technology/term diff of output
+     vs source CV, after the reviser; code cannot be argued with.
+   - Output: format check in the presenter — plain-text CV, expected
+     sections present, sane length.
+   - Runtime: loop cap DONE; bounded exponential backoff DONE; per-run
+     LLM-call ceiling still to add.
+
 3. **Eval suite** — both lanes live (section 6): `relevance` (UI, live) +
    `correctness` (code, experiments). Config snapshot for recreating the UI
    evaluator after a reseed: filter `Is Root Observation = true` + env
@@ -255,12 +269,8 @@ workflow is pytest + Langfuse traces as the single record.
    `$.content.parts[0].text`. NEXT: the four truthfulness judges
    (Faithfulness, Hallucination, Completeness, Job-tailoring) per
    `2026-07-31-eval-suite-design.md` — needs the presenter-metadata spike.
-4. **Investigate `correctness` = 0.5** — both scored runs report the same
-   regressions vs the expected output CV (job title downgraded, tailoring lost, skills
-   disorganised). Determine: real pipeline weakness vs over-fitted single expected output
-   item vs run variance. The learning loop: read judge reasons → tweak
-   writer/reviser prompts → rerun experiment with a change-named run → compare.
-5. **Grow `regression-cases`** — 1 item today (expected output hand-curated 2026-08-01:
+
+4. **Grow `regression-cases`** — 1 item today (expected output hand-curated 2026-08-01:
    fabrications stripped, titles kept honest — every fact grounded in the
    original CV; expected outputs must pass the same faithfulness bar as the pipeline).
    Claude drafts the new CV/JD pairs + expected outputs; owner reviews. Planned cases:
@@ -272,21 +282,23 @@ workflow is pytest + Langfuse traces as the single record.
      `cv_agent.evalset.json` wording)
    Prereq for multi-pair items: items must carry/name their own documents and
    the runner must load them per item (today it always loads the sample pair).
-6. **Delete junk experiment runs** — `run-20260731_135205/_142919/_143527`
-   (429 casualties + unscored first run); v4 has no UI delete, use
-   `DELETE /api/public/traces` on their trace ids. Owner go-ahead pending.
-7. **User-simulation evals** — ADK `ConversationScenario` (persona +
+
+5. **User-simulation evals** — ADK `ConversationScenario` (persona +
    conversation_plan) for multi-turn robustness; experimental in ADK 1.17.
-8. Consider making `max_iterations` and models configurable via `Config`.
-9. **Migrate to ADK 2.x** — see
+
+6. Consider making `max_iterations` and models configurable via `Config`.
+
+7. **Migrate to ADK 2.x** — see
    `docs/superpowers/specs/2026-07-29-adk-v2-upgrade-assessment.md`:
    recommended two-step 1.17 → 1.36.x now, 2.x once
    `openinference-instrumentation-google-adk` supports it. Both eval lanes are
    the safety net for the migration itself.
-10. **Presenter phase 2** — transfer back to root after presenting so the
+
+8. **Presenter phase 2** — transfer back to root after presenting so the
     user can discuss/iterate the CV; re-target the live evaluator when the
     final event becomes chat again (see presenter design discussion).
-11. **ADK eval scores → Langfuse scores** — attach
+
+9. **ADK eval scores → Langfuse scores** — attach
     `tool_trajectory_avg_score` / `response_match_score` via
     `langfuse.create_score()` so pytest judgments live next to traces.
 
