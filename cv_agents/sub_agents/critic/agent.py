@@ -10,7 +10,7 @@ configs = Config()
 critic_agent = Agent(
     model=configs.agent_settings.model,
     name="critic_agent",
-    instruction=fetch_instruction("critic-instruction", prompt.CRITIC_INSTRUCTION),
+    instruction=fetch_instruction("agents/critic", prompt.CRITIC_INSTRUCTION),
     tools=[exit_loop],
     output_key="cv_criticism",
 )

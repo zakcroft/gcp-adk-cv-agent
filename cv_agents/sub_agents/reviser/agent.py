@@ -10,6 +10,6 @@ configs = Config()
 reviser_agent = Agent(
     model=configs.agent_settings.model,
     name="reviser_agent",
-    instruction=fetch_instruction("reviser-instruction", prompt.REVISER_INSTRUCTION),
+    instruction=fetch_instruction("agents/reviser", prompt.REVISER_INSTRUCTION),
     output_key="cv_draft",
 )

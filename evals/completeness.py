@@ -15,7 +15,7 @@ async def completeness(*, input, output, expected_output=None, metadata=None, **
     customer_cv, _ = docs
     return judge(
         "completeness",
-        "completeness-judge",
+        "judges/completeness",
         customer_cv=customer_cv,
         produced=str(output),
     )

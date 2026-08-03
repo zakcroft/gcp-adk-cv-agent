@@ -16,7 +16,7 @@ async def hallucination(*, input, output, expected_output=None, metadata=None, *
     customer_cv, _ = docs
     return judge(
         "hallucination",
-        "hallucination-judge",
+        "judges/hallucination",
         customer_cv=customer_cv,
         produced=str(output),
     )

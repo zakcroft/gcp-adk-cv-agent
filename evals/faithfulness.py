@@ -14,7 +14,7 @@ async def faithfulness(*, input, output, expected_output=None, metadata=None, **
     customer_cv, _ = docs
     return judge(
         "faithfulness",
-        "faithfulness-judge",
+        "judges/faithfulness",
         customer_cv=customer_cv,
         produced=str(output),
     )

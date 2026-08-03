@@ -1,7 +1,7 @@
 # ───────────────────────────────────────────────
 # WRITER AGENT
 # ───────────────────────────────────────────────
-# Fallback for Langfuse prompt 'writer-instruction' (label: production).
+# Fallback for Langfuse prompt 'agents/writer' (label: production).
 # Keep in sync when promoting a new version; tests/unit/test_prompt_sync.py
 # fails on drift.
 WRITER_INSTRUCTION = """

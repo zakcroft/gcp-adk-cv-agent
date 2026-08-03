@@ -11,7 +11,7 @@ async def correctness(*, input, output, expected_output, metadata=None, **kwargs
         return []
     return judge(
         "correctness",
-        "correctness-judge",
+        "judges/correctness",
         query=str(input),
         expected=expected_output,
         produced=str(output),

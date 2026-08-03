@@ -16,7 +16,7 @@ async def tailoring(*, input, output, expected_output=None, metadata=None, **kwa
     customer_cv, job_description = docs
     return judge(
         "tailoring",
-        "tailoring-judge",
+        "judges/tailoring",
         customer_cv=customer_cv,
         job_description=job_description,
         produced=str(output),

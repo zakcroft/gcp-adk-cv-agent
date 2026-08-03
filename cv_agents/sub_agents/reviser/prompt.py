@@ -1,7 +1,7 @@
 # ───────────────────────────────────────────────
 # REVISER AGENT
 # ───────────────────────────────────────────────
-# Fallback for Langfuse prompt 'reviser-instruction' (label: production).
+# Fallback for Langfuse prompt 'agents/reviser' (label: production).
 # Keep in sync when promoting a new version; tests/unit/test_prompt_sync.py
 # fails on drift.
 REVISER_INSTRUCTION = """

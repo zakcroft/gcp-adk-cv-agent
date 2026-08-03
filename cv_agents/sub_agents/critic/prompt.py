@@ -1,7 +1,7 @@
 # ───────────────────────────────────────────────
 # CRITIC AGENT
 # ───────────────────────────────────────────────
-# Fallback for Langfuse prompt 'critic-instruction' (label: production).
+# Fallback for Langfuse prompt 'agents/critic' (label: production).
 # Keep in sync when promoting a new version; tests/unit/test_prompt_sync.py
 # fails on drift.
 CRITIC_INSTRUCTION = """

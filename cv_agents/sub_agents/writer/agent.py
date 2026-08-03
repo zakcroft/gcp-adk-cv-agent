@@ -15,7 +15,7 @@ writer_agent = Agent(
     model=configs.agent_settings.model,
     name="writer_agent",
     description="Generates CV drafts tailored to job descriptions.",
-    instruction=fetch_instruction("writer-instruction", prompt.WRITER_INSTRUCTION),
+    instruction=fetch_instruction("agents/writer", prompt.WRITER_INSTRUCTION),
     output_key="cv_draft",
 )
 
