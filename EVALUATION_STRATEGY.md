@@ -57,10 +57,10 @@ AND fabricated) — so each criterion gets its own scored, repeatable check.
 | Layer | Runs | Catches |
 |---|---|---|
 | ADK evalset + integration test (pytest) | on demand, pre-commit | broken tool trajectory, state-flow regressions (criterion 4) |
-| Experiments — `scripts/run_dataset_experiment.py` over dataset `regression-cases` | after every meaningful change | quality/truthfulness regressions vs hand-verified golds (criteria 1–3) |
+| Experiments — `scripts/run_dataset_experiment.py` over dataset `regression-cases` | after every meaningful change | quality/truthfulness regressions vs hand-verified expected outputs (criteria 1–3) |
 | Live evaluators (Langfuse UI) | every real chat, automatic | drift in production-style use |
 
-One judge per failure mode: `correctness` (vs gold, in code), `relevance`
+One judge per failure mode: `correctness` (vs expected output, in code), `relevance`
 (live), and — being built — `faithfulness` + `hallucination` (invention),
 `completeness` (omission), `tailoring` (missing the point), and
 `fit-disclosure` (weak fit not disclosed), fed by presenter-span metadata.
@@ -80,8 +80,8 @@ One judge per failure mode: `correctness` (vs gold, in code), `relevance`
 
 ## 4. Hand-verify all ground truth
 
-- Every fact in a gold must exist in its case's source CV — golds pass the
-  same faithfulness bar as the pipeline. (The first gold was saved from an
+- Every fact in an expected output must exist in its case's source CV — expected outputs pass the
+  same faithfulness bar as the pipeline. (The first expected output was saved from an
   embellished run and rewarded fabrication until hand-cleaned, 2026-08-01.)
 - Curate from real traces (Add-to-Dataset on good runs), then edit by hand;
   never enshrine unreviewed pipeline output.
@@ -98,12 +98,12 @@ Read the judge's reason, verify its claim against the source documents,
 then fix exactly one of:
 
 - the **pipeline** (prompts/structure) — the reason shows real defects;
-- the **gold** (dataset item) — the reference itself breaks rule 4;
+- the **expected output** (dataset item) — the reference itself breaks rule 4;
 - the **judge** (new prompt version) — the scoring is miscalibrated.
 
 Rerun with a change-named run and compare. Never tune two at once: the
 0.5 → 0.1 shift (2026-08-01) was measurement honesty, not a pipeline
-regression — interpretable only because gold and judge changes were named
+regression — interpretable only because expected output and judge changes were named
 and versioned separately.
 
 ## 6. Dev and prod share definitions, not judges
@@ -112,7 +112,7 @@ Decided by one question: **does the judge need ground truth?**
 
 | Judge | Needs | Dev (experiments) | Prod (live) |
 |---|---|---|---|
-| `correctness` | gold answer | yes | impossible — no gold for live requests |
+| `correctness` | expected output | yes | impossible — no expected output for live requests |
 | `relevance` | query + output | redundant (correctness is stricter) | yes |
 | `faithfulness` / `hallucination` | customer CV + output | yes | yes — same prompt, both surfaces |
 | `completeness` | customer CV + output | yes | yes |
@@ -121,7 +121,7 @@ Decided by one question: **does the judge need ground truth?**
 - Source-document judges run on BOTH surfaces from one shared definition
   (one evaluator binding, no environment filter) — dev and prod scores stay
   directly comparable.
-- Gold-based judges are dev-only by nature; their prod counterpart is the
+- Expected output-based judges are dev-only by nature; their prod counterpart is the
   source-document judges plus user signals.
 - Never fork a judge's definition between surfaces. Different criteria =
   new judge with a new name.
@@ -129,7 +129,7 @@ Decided by one question: **does the judge need ground truth?**
 ## 7. Current status and next steps
 
 Done: presenter ends every run with the CV + saves `improved_cv.md`; honest
-gold for `senior-match`; `correctness` judge v3 (worked example);
+expected output for `senior-match`; `correctness` judge v3 (worked example);
 `relevance` live evaluator; experiment runner with 429 retry and
 `metadata.source=code`.
 

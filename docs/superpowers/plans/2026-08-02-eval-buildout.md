@@ -17,20 +17,20 @@
 - Prompt/agent edits require restarting any running chat process (instructions load at import).
 - All Langfuse reads/writes use the project keys in `.env` (`pk-lf-277a…`/`sk-lf-26f5…`, `http://localhost:3000`). ClickHouse spot-checks: `docker exec langfuse-clickhouse-1 clickhouse-client`.
 - Names are load-bearing: score names, span names, prompt names, dataset name (`regression-cases`) must not drift from this plan.
-- Golds rule (EVALUATION_STRATEGY section 6): every fact in a gold must exist in its case's source CV. Zak reviews every gold before it enters the dataset.
+- Expected outputs rule (EVALUATION_STRATEGY section 6): every fact in an expected output must exist in its case's source CV. Zak reviews every expected output before it enters the dataset.
 
 ## Ground-truth scenario inventory (target end state of `regression-cases`)
 
-| # | Case id | Source docs | Input message | Gold | Tests |
+| # | Case id | Source docs | Input message | Expected output | Tests |
 |---|---|---|---|---|---|
-| 1 | `senior-match` | existing `examples/sample_cv.txt` + `sample_job_description.txt` (backend dev → senior fintech role) | "make a cv for me on this day Friday" (keep as-is) | existing hand-cleaned gold (2026-08-01) | the happy path; baseline continuity |
+| 1 | `senior-match` | existing `examples/sample_cv.txt` + `sample_job_description.txt` (backend dev → senior fintech role) | "make a cv for me on this day Friday" (keep as-is) | existing hand-cleaned expected output (2026-08-01) | the happy path; baseline continuity |
 | 2 | `career-switch` | marketing manager CV + junior data-analyst JD | "please tailor my cv for this data analyst job" | hand-written: honest transferable-skills CV, no invented analytics experience | tailoring honesty under mismatch |
 | 3 | `sparse-cv` | 8-line graduate CV (one internship, no metrics) + mid-level backend JD | "improve my cv for this role" | hand-written: modest, honest, well-structured; visibly thin | invention pressure — does the pipeline pad? |
 | 4 | `overqualified` | staff-engineer CV (rich, real metrics) + junior support-engineer JD | "adapt my cv for this job" | hand-written: de-emphasised seniority WITHOUT deleting history | omission pressure — completeness under downscoping |
 | 5 | `no-files-list` | none | "What files have I uploaded?" | verbatim reference reply from `cv_agent.evalset.json` (`list_files` case) | conversation path; correctness on refusal |
 | 6 | `no-files-improve` | none | "Please improve my CV for the job description I provided." | verbatim reference reply from `cv_agent.evalset.json` (`improve_cv_missing_files` case) | must not transfer to workflow |
 
-Cases 2–4 source docs + golds are DRAFTED by the implementer and REVIEWED by Zak before the dataset items are created (Task 6 has an explicit review gate).
+Cases 2–4 source docs + expected outputs are DRAFTED by the implementer and REVIEWED by Zak before the dataset items are created (Task 6 has an explicit review gate).
 
 ---
 
@@ -407,24 +407,24 @@ Expected: `faithfulness`, `hallucination`, `completeness`, `tailoring` present f
 
 ---
 
-### Task 6: Ground-truth scenarios — source documents, golds, dataset items
+### Task 6: Ground-truth scenarios — source documents, expected outputs, dataset items
 
 **Files:**
-- Create: `examples/cases/career-switch/cv.txt`, `examples/cases/career-switch/jd.txt`, `examples/cases/career-switch/gold.md`
-- Create: `examples/cases/sparse-cv/{cv.txt,jd.txt,gold.md}`
-- Create: `examples/cases/overqualified/{cv.txt,jd.txt,gold.md}`
-- Create: `examples/cases/senior-match/{cv.txt,jd.txt,gold.md}` (copies of the existing sample pair + current gold, so every case is self-contained)
+- Create: `examples/cases/career-switch/cv.txt`, `examples/cases/career-switch/jd.txt`, `examples/cases/career-switch/expected output.md`
+- Create: `examples/cases/sparse-cv/{cv.txt,jd.txt,expected output.md}`
+- Create: `examples/cases/overqualified/{cv.txt,jd.txt,expected output.md}`
+- Create: `examples/cases/senior-match/{cv.txt,jd.txt,expected output.md}` (copies of the existing sample pair + current expected output, so every case is self-contained)
 - Create: `scripts/sync_dataset.py`
 
 **Interfaces:**
 - Consumes: scenario inventory table above.
-- Produces: dataset items whose `input` is `{"message": <str>, "case": <case id or null>}`; `expected_output` = gold text. Task 7's runner depends on this exact input shape.
+- Produces: dataset items whose `input` is `{"message": <str>, "case": <case id or null>}`; `expected_output` = expected output text. Task 7's runner depends on this exact input shape.
 
-- [ ] **Step 1: Draft the three new case document pairs** (realistic, UK-flavoured, fictional people — NOT John Smith; each CV deliberately matching its scenario's pressure). Career-switch: marketing manager, 6 years, zero analytics tooling. Sparse: graduate, one internship, ≤ 8 content lines. Overqualified: staff engineer, 12 years, genuine metrics in the ORIGINAL (so the gold may keep them).
+- [ ] **Step 1: Draft the three new case document pairs** (realistic, UK-flavoured, fictional people — NOT John Smith; each CV deliberately matching its scenario's pressure). Career-switch: marketing manager, 6 years, zero analytics tooling. Sparse: graduate, one internship, ≤ 8 content lines. Overqualified: staff engineer, 12 years, genuine metrics in the ORIGINAL (so the expected output may keep them).
 
-- [ ] **Step 2: Draft each gold** (`gold.md`) obeying the golds rule: facts only from that case's `cv.txt`; tailoring via structure/emphasis; British English. For `overqualified`, real original metrics are retained — this tests that judges allow grounded numbers.
+- [ ] **Step 2: Draft each expected output** (`expected output.md`) obeying the expected-output rule: facts only from that case's `cv.txt`; tailoring via structure/emphasis; British English. For `overqualified`, real original metrics are retained — this tests that judges allow grounded numbers.
 
-- [ ] **Step 3: REVIEW GATE — present all drafts to Zak.** Show each cv/jd/gold. Do not proceed until each gold is approved. (Approved golds are the constitution of the eval suite.)
+- [ ] **Step 3: REVIEW GATE — present all drafts to Zak.** Show each cv/jd/expected output. Do not proceed until each expected output is approved. (Approved expected outputs are the constitution of the eval suite.)
 
 - [ ] **Step 4: Write `scripts/sync_dataset.py`** — idempotent dataset sync (same header pattern as `run_dataset_experiment.py`: sys.path insert, Config().setup_environment(), get_client):
 
@@ -463,12 +463,12 @@ def main() -> None:
     langfuse = get_client()
 
     for case_id, message in CASE_MESSAGES.items():
-        gold = (CASES_DIR / case_id / "gold.md").read_text()
+        expected output = (CASES_DIR / case_id / "expected output.md").read_text()
         langfuse.create_dataset_item(
             dataset_name=DATASET,
             id=f"case-{case_id}",
             input={"message": message, "case": case_id},
-            expected_output=gold,
+            expected_output=expected output,
         )
         print(f"synced case-{case_id}")
 
@@ -493,7 +493,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 5: Migration note — the legacy item.** The original item (`ffbeed4f-…`, plain-string input) becomes redundant once `case-senior-match` exists with the same gold. Ask Zak: archive it (Langfuse UI → item → archive) to avoid double-running the same case. Do not delete without his go.
+- [ ] **Step 5: Migration note — the legacy item.** The original item (`ffbeed4f-…`, plain-string input) becomes redundant once `case-senior-match` exists with the same expected output. Ask Zak: archive it (Langfuse UI → item → archive) to avoid double-running the same case. Do not delete without his go.
 
 - [ ] **Step 6: Run the sync:**
 
@@ -729,5 +729,5 @@ git commit -m "update spec and strategy for the four-judge eval suite"
 ## Self-review notes
 
 - Spec coverage: strategy section 10.1 → Task 1; section 10.2 → Tasks 2–5; section 10.3 → Task 6; section 10.4 runner ergonomics → Task 7 (`--run-name`), pytest env separation and ADK-scores→Langfuse deliberately NOT in this plan (separate small chores, SPEC section 7); dev/prod parity section 8 → Task 5 env-filter-none decision; eval-suite design section 3 metadata → Tasks 2–3; section 4 configs → Task 5.
-- Known judgement points left to Zak: gold approvals (Task 6 Step 3), legacy item archival (Task 6 Step 5), every commit.
+- Known judgement points left to Zak: expected output approvals (Task 6 Step 3), legacy item archival (Task 6 Step 5), every commit.
 - Type consistency: `resolve_item` shape defined in Task 7 matches Task 6's item input `{"message", "case"}`; metadata keys in Task 3 match Task 5 JSONPaths.

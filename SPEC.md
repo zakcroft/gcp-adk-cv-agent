@@ -170,7 +170,7 @@ Three complementary layers (see also
 **The two-lane model** (Langfuse side):
 - **Lane 1 — regression (code):** `scripts/run_dataset_experiment.py` runs the
   REAL pipeline over Langfuse dataset `regression-cases` (items = input +
-  expected gold CV) and scores each item with an in-code LLM judge → score
+  expected expected CV) and scores each item with an in-code LLM judge → score
   `correctness` ("does output match the known-good answer?"). The judge prompt
   is shared via Langfuse Prompt Management: `correctness-judge`, label
   `production`; each score records `judge_prompt_version`. Run:
@@ -247,19 +247,19 @@ workflow is pytest + Langfuse traces as the single record.
    (Faithfulness, Hallucination, Completeness, Job-tailoring) per
    `2026-07-31-eval-suite-design.md` — needs the presenter-metadata spike.
 4. **Investigate `correctness` = 0.5** — both scored runs report the same
-   regressions vs the gold CV (job title downgraded, tailoring lost, skills
-   disorganised). Determine: real pipeline weakness vs over-fitted single gold
+   regressions vs the expected output CV (job title downgraded, tailoring lost, skills
+   disorganised). Determine: real pipeline weakness vs over-fitted single expected output
    item vs run variance. The learning loop: read judge reasons → tweak
    writer/reviser prompts → rerun experiment with a change-named run → compare.
-5. **Grow `regression-cases`** — 1 item today (gold hand-curated 2026-08-01:
+5. **Grow `regression-cases`** — 1 item today (expected output hand-curated 2026-08-01:
    fabrications stripped, titles kept honest — every fact grounded in the
-   original CV; golds must pass the same faithfulness bar as the pipeline).
-   Claude drafts the new CV/JD pairs + golds; owner reviews. Planned cases:
+   original CV; expected outputs must pass the same faithfulness bar as the pipeline).
+   Claude drafts the new CV/JD pairs + expected outputs; owner reviews. Planned cases:
    - 2–3 CV/JD pairs across industries and seniority levels
    - a sparse CV (little to work with — does the pipeline invent to
      compensate? the fabrication problem as a test case)
    - a mismatched CV/JD pair (does tailoring stay honest?)
-   - no-files cases (gold = the "please upload" reply; reuse
+   - no-files cases (expected output = the "please upload" reply; reuse
      `cv_agent.evalset.json` wording)
    Prereq for multi-pair items: items must carry/name their own documents and
    the runner must load them per item (today it always loads the sample pair).

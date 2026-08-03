@@ -28,7 +28,7 @@ from cv_agents.config import Config
 config = Config()
 config.setup_environment()
 
-from langfuse import Evaluation, get_client
+from langfuse import get_client
 from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 
 # Langfuse client must exist before agents run: it registers the OTel exporter
@@ -39,6 +39,8 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+
+from evals import ALL_EVALUATORS
 
 from cv_agents.agent import root_agent
 
@@ -100,38 +102,6 @@ async def task(*, item, **kwargs) -> str:
     raise RuntimeError("unreachable")
 
 
-async def correctness_judge(*, input, output, expected_output, metadata=None, **kwargs):
-    """Compare produced output to the dataset item's expected output (LLM judge).
-
-    The judge prompt is shared via Langfuse Prompt Management ("correctness-judge",
-    label "production") so it can be edited/versioned in the UI; the run records
-    which version judged it.
-    """
-    if not expected_output:
-        return Evaluation(name="correctness", value=0.0, comment="item has no expected output")
-
-    import json
-
-    from google import genai
-
-    judge_prompt = langfuse.get_prompt("correctness-judge")
-    client = genai.Client()
-    response = client.models.generate_content(
-        model=config.agent_settings.model,
-        contents=judge_prompt.compile(
-            query=str(input), expected=expected_output, produced=output
-        ),
-        config={"response_mime_type": "application/json"},
-    )
-    verdict = json.loads(response.text)
-    return Evaluation(
-        name="correctness",
-        value=float(verdict["score"]),
-        comment=verdict.get("reason", ""),
-        metadata={"judge_prompt_version": judge_prompt.version},
-    )
-
-
 def main() -> None:
     dataset_name = sys.argv[1] if len(sys.argv) > 1 else "regression-cases"
     run_name = sys.argv[2] if len(sys.argv) > 2 else f"run-{datetime.now():%Y%m%d_%H%M%S}"
@@ -143,7 +113,7 @@ def main() -> None:
         name=run_name,
         description="Full cv-agent pipeline over dataset items",
         task=task,
-        evaluators=[correctness_judge],
+        evaluators=ALL_EVALUATORS,
         max_concurrency=1,  # serial: avoids Vertex AI 429s (see CLAUDE.md)
         metadata={"source": "code"},  # filterable in the Experiments table
     )
