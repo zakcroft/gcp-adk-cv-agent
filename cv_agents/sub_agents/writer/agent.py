@@ -5,6 +5,7 @@ from cv_agents.sub_agents.presenter.agent import cv_presenter_agent
 from cv_agents.sub_agents.reviser.agent import reviser_agent
 
 from cv_agents.config import Config
+from cv_agents.remote_prompts import fetch_instruction
 from cv_agents.sub_agents.writer import prompt
 
 configs = Config()
@@ -14,7 +15,7 @@ writer_agent = Agent(
     model=configs.agent_settings.model,
     name="writer_agent",
     description="Generates CV drafts tailored to job descriptions.",
-    instruction=prompt.WRITER_INSTRUCTION,
+    instruction=fetch_instruction("writer-instruction", prompt.WRITER_INSTRUCTION),
     output_key="cv_draft",
 )
 

@@ -29,6 +29,15 @@ English, preserving factual accuracy while tailoring emphasis to the role.
 cv_agent_app (LlmAgent, model gemini-2.5-flash)          cv_agents/agent.py
 │  tools: list_uploaded_files, load_customer_documents   cv_agents/tools.py
 │  instruction: cv_agents/prompt.py (ROOT_INSTRUCTION + GLOBAL_INSTRUCTION)
+│
+│  Writer/critic/reviser instructions are fetched at import from Langfuse
+│  Prompt Management (`writer-instruction` / `critic-instruction` /
+│  `reviser-instruction`, label `production`; v1 = original, v2 = grounded
+│  anti-fabrication) via cv_agents/remote_prompts.py, falling back to the
+│  local prompt.py text if Langfuse is down. Edit prompts in the UI; restart
+│  the app to pick up a new version. The root agent's instruction is local
+│  only. When promoting a new production version, re-sync the local
+│  prompt.py fallbacks — tests/unit/test_prompt_sync.py fails on drift.
 └─ cv_writer_sequential_agent (SequentialAgent)          cv_agents/sub_agents/writer/agent.py
    ├─ writer_agent (LlmAgent)      output_key: cv_draft
    ├─ reviser_loop_agent (LoopAgent, max_iterations=3)
