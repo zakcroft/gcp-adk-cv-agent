@@ -30,7 +30,7 @@ def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
     # mid-call, closing its connection pool ("client has been closed").
     client = genai.Client()
     response = None
-    for attempt, delay in enumerate((20, 45, 90, None)):
+    for attempt, delay in enumerate((20, 45, 90, 180, 300, None)):
         try:
             response = client.models.generate_content(
                 model=JUDGE_MODEL,

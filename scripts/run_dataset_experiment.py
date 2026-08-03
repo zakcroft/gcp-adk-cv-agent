@@ -91,7 +91,9 @@ async def task(*, item, **kwargs) -> str:
     print(f"\n=== item {item.id}: running pipeline...")
     # Vertex uses shared quota: bursts can 429 transiently. Retry with backoff
     # instead of failing the item (a 429 means "not this second", not "no").
-    delays = (30, 60, 120)
+    # Patient by design: evals are batch jobs that must finish, not fail.
+    # Worst case ~25 min of waiting per item on a starved quota day.
+    delays = (30, 60, 120, 240, 480, 600)
     for attempt, delay in enumerate((*delays, None)):
         try:
             return await run_pipeline(question)

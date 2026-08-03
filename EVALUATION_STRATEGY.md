@@ -75,8 +75,11 @@ One judge per failure mode: `correctness` (vs expected output, in code), `releva
   fabrication 0.5 until the worked example was added.
 - Score names say the question asked (`correctness`, `relevance`); the
   lane/source lives in environment + metadata, never in the name.
-- Judge model: `gemini-2.5-flash` via Vertex ADC, `location=global`
-  (regional endpoints 429 under call bursts).
+- Judge model: `gemini-2.5-flash-lite` via Vertex ADC, `location=global`
+  (regional endpoints 429 under call bursts; lite halves quota contention).
+- Evals are batch jobs: they must finish, not fail. All LLM calls (pipeline
+  and judges) retry 429s with exponential backoff — slow on a starved-quota
+  day is acceptable, a dead run is not. Exact delays live in code.
 
 ## 4. Hand-verify all ground truth
 
