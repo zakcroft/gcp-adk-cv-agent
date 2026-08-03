@@ -178,10 +178,14 @@ Three complementary layers (see also
 
 **The two-lane model** (Langfuse side):
 - **Lane 1 — regression (code):** `scripts/run_dataset_experiment.py` runs the
-  REAL pipeline over Langfuse dataset `regression-cases` (items = input +
-  expected expected CV) and scores each item with an in-code LLM judge → score
-  `correctness` ("does output match the known-good answer?"). The judge prompt
-  is shared via Langfuse Prompt Management: `correctness-judge`, label
+  REAL pipeline over Langfuse dataset `regression-cases` and scores each
+  item with the in-code judge suite (`evals/`). Item input is
+  `{"message": str, "case": str|null}`; `case` names a directory under
+  `examples/cases/<case>/` (cv.txt + jd.txt + expected_output.md) whose
+  documents the runner preloads per item (`resolve_item`); `case: null` =
+  a no-files conversation item. `scripts/sync_dataset.py` syncs items from
+  the case library + the ADK evalset (one source of truth). The judge
+  prompts are shared via Langfuse Prompt Management: `judges/*`, label
   `production`; each score records `judge_prompt_version`. Run:
   `uv run python scripts/run_dataset_experiment.py [dataset] [run-name]` —
   name runs after WHAT CHANGED (like a commit message); runs carry
@@ -297,6 +301,13 @@ workflow is pytest + Langfuse traces as the single record.
 8. **Presenter phase 2** — transfer back to root after presenting so the
     user can discuss/iterate the CV; re-target the live evaluator when the
     final event becomes chat again (see presenter design discussion).
+    Include **elicitation**: when the source CV is sparse, ask the user for
+    more detail (projects, tools, outcomes) instead of returning a thin CV —
+    real content from the user beats both padding and thin honesty. The
+    `sparse-cv` case then gains a conversational variant.
+    Fit notes are NOT part of the CV document: the presenter splits the
+    writer's FIT NOTE out of `cv_draft` and surfaces it to the user
+    separately (own paragraph now; UI banner later via `fit_note` metadata).
 
 9. **ADK eval scores → Langfuse scores** — attach
     `tool_trajectory_avg_score` / `response_match_score` via

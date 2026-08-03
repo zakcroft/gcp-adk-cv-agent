@@ -1,21 +1,44 @@
 Support Engineer (Junior)
 NorthBridge SaaS — Edinburgh, UK (office-based)
+£26,000 - £30,000
 
-About the role
-NorthBridge provides scheduling software for healthcare providers. Our
-support engineers investigate customer-reported issues, reproduce bugs, and
-work with the development team to get them fixed.
+About NorthBridge
+NorthBridge provides scheduling and rota software for healthcare
+providers — 300+ clinics and care organisations across the UK rely on us
+to get the right staff in the right place. We're a stable, profitable
+company of 45 people, and our support team is the front line of our
+reputation: customers regularly name them in reviews.
 
-Responsibilities
-• Investigate and triage customer-reported technical issues
-• Reproduce bugs and write clear reports for the development team
-• Run SQL queries to investigate data issues
-• Write and update support documentation
-• Escalate incidents and communicate status to customers
+The role
+Our support engineers investigate customer-reported issues, reproduce
+bugs, and work directly with the development team to get them fixed. This
+is a technical role, not a call-centre role: you'll spend most of your
+day in logs, databases, and bug reports rather than on the phone.
 
-Requirements
+What you'll be doing
+• Investigating and triaging customer-reported technical issues
+• Reproducing bugs in our test environments and writing clear, complete
+  reports for the development team
+• Running SQL queries to investigate data issues and correct records
+  under change control
+• Reading application logs to trace what actually happened
+• Writing and updating support documentation and runbooks
+• Escalating incidents appropriately and communicating status to
+  customers in plain English
+
+What we're looking for
 • Some experience with SQL and reading application logs
-• A methodical approach to troubleshooting
-• Clear written communication
+• A methodical, evidence-first approach to troubleshooting
+• Clear written communication — most of your output is written
 • Basic scripting ability (Python or similar) is a plus
-• Patience and a customer-first attitude
+• Patience and a customer-first attitude; our users are clinicians and
+  care coordinators, not technologists
+• Comfortable working fully office-based in central Edinburgh
+
+Growth
+Support engineers who want to move toward development get real routes to
+do so — two of our current developers started on the support desk.
+
+Benefits
+23 days holiday + bank holidays, healthcare cash plan, subsidised gym
+membership, season-ticket loan, Friday team lunches.

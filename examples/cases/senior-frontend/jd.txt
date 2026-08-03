@@ -1,0 +1,44 @@
+Senior Frontend Developer
+React | Next.js | TypeScript | Bristol | £70,000-£80,000
+
+A growing software business is looking for a Senior Frontend Developer to
+join its engineering team as it continues to invest in its platform and
+technical capability.
+
+This is a hands-on role for someone who enjoys building modern web
+applications, solving technical problems and contributing to architectural
+decisions within a collaborative engineering environment.
+
+The role
+
+You'll work alongside Product, Design and Engineering teams to develop and
+improve web applications using React, Next.js and TypeScript.
+
+You'll also contribute to frontend architecture, help improve code quality
+and support the development of other engineers through collaboration and
+code reviews.
+
+Experience we're looking for
+
+• Strong commercial experience with React and TypeScript
+• Experience building applications with Next.js
+• Good understanding of modern frontend architecture
+• Experience with state management libraries
+• Familiarity with testing frameworks such as Jest, Playwright or Cypress
+• Experience working with REST APIs
+• Comfortable working within an Agile development environment
+
+Any experience with Node.js, design systems or cloud technologies would be
+beneficial but isn't essential.
+
+What's on offer
+
+• Salary between £70,000 - £80,000
+• Hybrid working
+• Modern technology stack
+• Collaborative engineering culture
+• Opportunity to influence technical decisions
+• Long-term career development
+
+If you're interested in finding out more, please apply to the advert and
+I'll be in touch for a confidential discussion.

@@ -1,31 +1,53 @@
 Junior Data Analyst
-DataFirst Insights — Manchester, UK (hybrid)
+DataFirst Insights — Manchester, UK (hybrid, 2 days in office)
+£28,000 - £34,000 + benefits
 
 About us
-DataFirst Insights helps retail clients understand their customers through
-data. Our analysts turn raw sales and marketing data into clear, actionable
-reports.
+DataFirst Insights helps retail brands understand their customers through
+data. From our Manchester office we support over 40 clients across the UK
+and Europe, turning raw sales, marketing, and loyalty data into clear,
+actionable reporting. We're a team of 25 and growing, and we invest
+properly in developing junior analysts — structured mentoring, a training
+budget, and a clear progression path to senior analyst within 2-3 years.
 
 The role
 We are looking for a Junior Data Analyst to join our client services team.
-You will work with senior analysts to prepare, analyse, and present data
-for retail clients.
+Working day to day with two senior analysts, you'll prepare, analyse, and
+present data for a portfolio of retail clients. This is a genuinely
+hands-on analytical role: you will be in the data every day.
 
-Responsibilities
-• Clean and prepare datasets in SQL and Python
-• Build dashboards and reports in Power BI
-• Run exploratory analysis to answer client questions
-• Present findings clearly to non-technical stakeholders
-• Support senior analysts on larger modelling projects
+What you'll be doing
+• Cleaning and preparing client datasets in SQL and Python
+• Building and maintaining dashboards and reports in Power BI
+• Running exploratory analysis to answer client questions
+• Presenting findings clearly to non-technical stakeholders, in writing
+  and on client calls
+• Supporting senior analysts on larger modelling and segmentation projects
+• Contributing to our internal documentation and analysis playbooks
 
-Requirements
+What we're looking for
 • Working knowledge of SQL and at least one of Python or R
 • Experience with a BI tool (Power BI, Tableau, or Looker)
-• Comfort with statistics fundamentals (distributions, significance testing)
-• Strong Excel skills
-• Clear written and verbal communication
-• Degree in a numerate or analytical discipline preferred
+• Comfort with statistics fundamentals (distributions, significance
+  testing, confidence intervals)
+• Strong Excel skills — pivot tables, lookups, charts
+• Clear written and verbal communication; you can explain a finding to
+  someone who has never seen a database
+• A methodical, detail-first approach to checking your own work
+• Degree in a numerate or analytical discipline preferred, but we care
+  more about demonstrable skills than certificates
 
 Nice to have
 • Experience analysing marketing or sales data
-• Familiarity with Google Analytics
+• Familiarity with Google Analytics or other web analytics tools
+• Exposure to dbt, BigQuery, or cloud data warehouses
+• Experience presenting to clients or senior stakeholders
+
+Benefits
+25 days holiday + bank holidays, private healthcare, £1,000 annual
+training budget, hybrid working, cycle-to-work scheme, regular team
+socials.
+
+DataFirst Insights is an equal opportunities employer. We welcome
+applications from all backgrounds and are happy to discuss flexible
+working arrangements.

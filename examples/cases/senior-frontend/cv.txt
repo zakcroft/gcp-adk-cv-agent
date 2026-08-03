@@ -1,0 +1,41 @@
+Priya Nair
+Frontend Developer
+priya.nair@email.com | +44 7700 900321 | Bath, UK
+LinkedIn: linkedin.com/in/priyanair | GitHub: github.com/priyanair
+
+PROFESSIONAL SUMMARY
+Frontend developer with 7 years of experience building web applications,
+the last 5 focused on React and TypeScript. Currently at a fintech scale-up
+building customer dashboards used by around 30,000 users.
+
+EXPERIENCE
+
+Frontend Developer | Ledgerly | Bristol, UK (hybrid) | Sep 2021 - Present
+• Build and maintain customer-facing dashboards in React and TypeScript
+• Introduced Redux Toolkit for state management across three product areas
+• Wrote and maintain Jest unit tests; team coverage target is 80%
+• Built one internal tool with Next.js (marketing pages and a small admin)
+• Work with REST APIs built by the backend team; occasionally add
+  endpoints to the Node.js BFF layer
+• Review pull requests daily and onboarded four new starters
+• Work in two-week sprints with product and design
+
+Web Developer | Somerset Digital Agency | Bath, UK | Jun 2018 - Aug 2021
+• Built marketing sites and e-commerce frontends for clients
+• Started with jQuery and WordPress themes, moved to React in 2019
+• Set up reusable component patterns shared across client projects
+• Dealt directly with clients on requirements and revisions
+
+EDUCATION
+
+BSc Computing | University of the West of England | 2014 - 2018
+• Second-class honours (2:1); placement year at a software house
+
+SKILLS
+
+Frontend: React, TypeScript, JavaScript (ES6+), HTML, CSS/Sass
+State management: Redux Toolkit, React Context
+Frameworks: Next.js (one production project), Express (basic)
+Testing: Jest, React Testing Library
+Tools: Git, GitHub Actions, Figma handoff, Storybook
+Ways of working: Agile/Scrum, code reviews, pairing

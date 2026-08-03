@@ -46,10 +46,36 @@ from cv_agents.agent import root_agent
 
 PROJECT_ROOT = Path(__file__).parent.parent
 USER_ID = "experiment_user"
-EXAMPLE_FILES = ("sample_cv.txt", "sample_job_description.txt")
+CASES_DIR = PROJECT_ROOT / "examples" / "cases"
+# Uploaded-file names the tools expect; every case supplies both under these names
+ARTIFACT_NAMES = ("sample_cv.txt", "sample_job_description.txt")
+CASE_FILES = ("cv.txt", "jd.txt")
 
 
-async def run_pipeline(question: str) -> str:
+def resolve_item(item_input):
+    """Map a dataset item input to (message, [(artifact_name, bytes), ...]).
+
+    Dict inputs carry a `case` id resolving to examples/cases/<case>/;
+    `case: None` = no-files conversation item. Plain strings are the legacy
+    senior-match shape."""
+    if isinstance(item_input, str):
+        case = "senior-match"
+        message = item_input
+    else:
+        case = item_input.get("case")
+        message = item_input["message"]
+
+    if case is None:
+        return message, []
+
+    artifacts = [
+        (artifact_name, (CASES_DIR / case / case_file).read_bytes())
+        for artifact_name, case_file in zip(ARTIFACT_NAMES, CASE_FILES)
+    ]
+    return message, artifacts
+
+
+async def run_pipeline(message: str, artifacts) -> str:
     """One full agent run in a fresh session; returns the final response text."""
     session_id = f"experiment_{uuid.uuid4().hex[:8]}"
     session_service = InMemorySessionService()
@@ -58,8 +84,7 @@ async def run_pipeline(question: str) -> str:
     await session_service.create_session(
         app_name=config.app_name, user_id=USER_ID, session_id=session_id
     )
-    for filename in EXAMPLE_FILES:
-        content = (PROJECT_ROOT / "examples" / filename).read_bytes()
+    for filename, content in artifacts:
         await artifact_service.save_artifact(
             app_name=config.app_name,
             user_id=USER_ID,
@@ -76,9 +101,9 @@ async def run_pipeline(question: str) -> str:
     )
 
     final_text = ""
-    message = types.Content(role="user", parts=[types.Part(text=question)])
+    new_message = types.Content(role="user", parts=[types.Part(text=message)])
     async for event in runner.run_async(
-        user_id=USER_ID, session_id=session_id, new_message=message
+        user_id=USER_ID, session_id=session_id, new_message=new_message
     ):
         if event.is_final_response() and event.content and event.content.parts:
             if event.content.parts[0].text:
@@ -87,7 +112,7 @@ async def run_pipeline(question: str) -> str:
 
 
 async def task(*, item, **kwargs) -> str:
-    question = item.input if isinstance(item.input, str) else str(item.input)
+    message, artifacts = resolve_item(item.input)
     print(f"\n=== item {item.id}: running pipeline...")
     # Vertex uses shared quota: bursts can 429 transiently. Retry with backoff
     # instead of failing the item (a 429 means "not this second", not "no").
@@ -96,7 +121,7 @@ async def task(*, item, **kwargs) -> str:
     delays = (30, 60, 120, 240, 480, 600)
     for attempt, delay in enumerate((*delays, None)):
         try:
-            return await run_pipeline(question)
+            return await run_pipeline(message, artifacts)
         except Exception as e:
             if "429" not in str(e) or delay is None:
                 raise

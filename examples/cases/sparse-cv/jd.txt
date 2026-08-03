@@ -1,20 +1,48 @@
 Backend Engineer (Mid-level)
-Halcyon Logistics — Bristol, UK
+Halcyon Logistics — Bristol, UK (office-first, 1 day remote)
+£45,000 - £58,000 depending on experience
 
-About the role
-Halcyon builds routing and tracking software for freight companies. We need
-a backend engineer to develop and maintain our Java services.
+About Halcyon
+Halcyon builds routing and tracking software for freight companies. Our
+platform plans and monitors thousands of vehicle movements a day for
+hauliers across the UK and Ireland. We're a 60-person company with a
+12-person engineering team, and our systems genuinely matter to our
+customers' operations — when we're down, trucks stand still.
+
+The role
+We need a backend engineer to develop and maintain our core Java
+services: route planning, tracking ingestion, and customer-facing APIs.
+You'll own features end to end — design, build, test, ship, and support
+in production.
 
 Responsibilities
 • Design and build features across our Java/Spring microservices
-• Write and maintain automated tests
-• Work with PostgreSQL databases
-• Take part in code reviews and on-call rotation
-• Collaborate with product and frontend teams
+• Write and maintain automated tests as part of everyday development
+• Model and query data in PostgreSQL; keep our schemas sane
+• Take part in code reviews and our weekly design sessions
+• Join the on-call rotation (roughly one week in six, paid)
+• Collaborate with product managers and the frontend team on delivery
+• Help us keep our CI pipelines fast and reliable
 
 Requirements
 • 3+ years of professional backend development experience
-• Strong Java; Spring Boot experience preferred
-• Solid SQL and experience with relational databases
-• Experience with testing frameworks (JUnit or similar)
-• Familiarity with Git and CI pipelines
+• Strong Java; Spring Boot experience strongly preferred
+• Solid SQL and real experience with relational databases in production
+• Experience with testing frameworks (JUnit or similar) and a testing
+  mindset
+• Comfortable with Git, pull-request workflows, and CI pipelines
+• Able to communicate technical decisions clearly in writing
+
+Nice to have
+• Exposure to messaging systems (Kafka, RabbitMQ, or similar)
+• Docker and container-based deployment experience
+• Experience in logistics, mapping, or other operationally-critical
+  domains
+
+What we offer
+25 days holiday, annual bonus scheme, pension matching to 6%, paid
+on-call, £800 personal development budget, free parking at the Bristol
+office.
+
+We review every application personally — no keyword filters — and aim to
+respond within a week.

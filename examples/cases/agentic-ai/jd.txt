@@ -1,0 +1,58 @@
+Agentic AI Engineer
+
+We're building a modern, cloud-native platform and evolving towards an
+agentic-first engineering model, where AI agents perform meaningful
+delivery and operational work alongside a small, highly experienced
+engineering team.
+
+We're looking for an Agentic AI Engineer to design, build and own the
+production platform that enables AI agents to operate safely and
+effectively. This is not simply about integrating LLMs, it is about
+creating the infrastructure, tooling and governance that allows autonomous
+systems to deliver real business value in production.
+
+A key part of this role is knowing when an AI agent is the right solution
+and when a deterministic workflow is the better engineering choice. You'll
+help define this balance and play a central role in shaping how AI is
+adopted across the organisation.
+
+What you'll do
+• Design, build and own the production platform that enables AI agents to
+  perform real engineering and operational tasks.
+• Develop the tooling, orchestration, guardrails, evaluation frameworks
+  and execution patterns required for reliable autonomous systems.
+• Make architectural decisions around where agentic AI adds genuine value
+  and where traditional deterministic workflows are more appropriate.
+• Build evaluation frameworks for measuring the quality, reliability and
+  safety of non-deterministic AI outputs.
+• Work closely with engineering teams to ensure autonomous systems can
+  safely interact with code, infrastructure and business-critical
+  workflows.
+• Deliver production-ready AI agents that automate complex engineering and
+  operational processes.
+• Help shape and evolve an AI-first operating model across the wider
+  technology function.
+
+Technology
+You'll work with modern LLMs, agent orchestration frameworks, evaluation
+tooling, cloud-native infrastructure (AWS or similar), APIs and
+contemporary AI development ecosystems.
+
+What we're looking for
+• Proven experience building and operating production-grade agentic AI
+  systems — not just prototypes or prompt engineering demonstrations.
+• Strong understanding of agent orchestration, tool design, guardrails and
+  evaluation for non-deterministic systems.
+• Experience designing secure autonomous workflows that interact with
+  applications, codebases or cloud infrastructure.
+• Excellent judgement around when agentic AI is the right solution versus
+  when deterministic automation delivers a better outcome.
+• Strong software engineering and cloud architecture fundamentals.
+
+Nice to have
+• Experience working with leading foundation model providers and modern AI
+  development ecosystems.
+• Background in applied AI research or LLM experimentation.
+• Experience with retrieval systems, RAG, context engineering or knowledge
+  systems.
+• Familiarity with cloud-native AI deployment and MLOps practices.
