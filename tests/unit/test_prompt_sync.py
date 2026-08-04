@@ -15,6 +15,7 @@ PAIRS = [
     ("agents/writer", "cv_agents.sub_agents.writer.prompt", "WRITER_INSTRUCTION"),
     ("agents/critic", "cv_agents.sub_agents.critic.prompt", "CRITIC_INSTRUCTION"),
     ("agents/reviser", "cv_agents.sub_agents.reviser.prompt", "REVISER_INSTRUCTION"),
+    ("agents/verifier", "cv_agents.sub_agents.verifier.prompt", "VERIFIER_INSTRUCTION"),
 ]
 
 

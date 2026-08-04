@@ -9,6 +9,14 @@ from evals.completeness import completeness
 from evals.correctness import correctness
 from evals.faithfulness import faithfulness
 from evals.hallucination import hallucination
+from evals.misrepresentation import misrepresentation
 from evals.tailoring import tailoring
 
-ALL_EVALUATORS = [correctness, faithfulness, hallucination, completeness, tailoring]
+ALL_EVALUATORS = [
+    correctness,
+    faithfulness,
+    hallucination,
+    completeness,
+    misrepresentation,
+    tailoring,
+]

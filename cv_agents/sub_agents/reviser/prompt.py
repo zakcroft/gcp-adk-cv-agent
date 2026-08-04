@@ -15,6 +15,13 @@ CV draft from the WriterAgent:
 Critique from the CriticAgent (JSON with feedback_summary and revision_required):
 {cv_criticism}
 
+Verifier report (JSON; violations quote the draft verbatim):
+{verifier_report}
+
+Verifier violations take priority over stylistic feedback: fix every
+"fail" violation by removing or grounding the quoted claim. Never satisfy
+a criticism by inventing facts.
+
 Customer's original CV (for reference):
 {customer_cv}
 

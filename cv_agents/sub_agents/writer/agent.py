@@ -3,6 +3,7 @@ from google.adk.agents import Agent, LoopAgent, SequentialAgent
 from cv_agents.sub_agents.critic.agent import critic_agent
 from cv_agents.sub_agents.presenter.agent import cv_presenter_agent
 from cv_agents.sub_agents.reviser.agent import reviser_agent
+from cv_agents.sub_agents.verifier.agent import verifier_agent
 
 from cv_agents.config import Config
 from cv_agents.remote_prompts import fetch_instruction
@@ -19,12 +20,13 @@ writer_agent = Agent(
     output_key="cv_draft",
 )
 
-# Loop agent for iterative CV refinement (Critic → Reviser)
-# Terminates when the critic calls exit_loop or after max_iterations
+# Loop agent for iterative CV refinement (Critic → Verifier → Reviser).
+# The critic is advisory; the verifier holds exit_loop and approves only
+# when its truth check is clean AND the critic set revision_required false.
 reviser_loop_agent = LoopAgent(
     name="reviser_loop_agent",
-    description="Iteratively critiques and revises the CV draft",
-    sub_agents=[critic_agent, reviser_agent],
+    description="Iteratively critiques, truth-checks, and revises the CV draft",
+    sub_agents=[critic_agent, verifier_agent, reviser_agent],
     max_iterations=3,
 )
 

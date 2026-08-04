@@ -40,7 +40,12 @@ cv_agent_app (LlmAgent, model gemini-2.5-flash)          cv_agents/agent.py
 └─ cv_writer_sequential_agent (SequentialAgent)          cv_agents/sub_agents/writer/agent.py
    ├─ writer_agent (LlmAgent)      output_key: cv_draft
    ├─ reviser_loop_agent (LoopAgent, max_iterations=3)
-   │  ├─ critic_agent (LlmAgent)   output_key: cv_criticism, tool: exit_loop
+   │  ├─ critic_agent (LlmAgent)   output_key: cv_criticism  (advisory — no exit)
+   │  ├─ verifier_agent (LlmAgent) output_key: verifier_report, tool: exit_loop
+   │  │    truth gate: four-rule rubric (faithfulness, hallucination,
+   │  │    completeness, misrepresentation) vs the customer's CV; exits the
+   │  │    loop only when clean AND critic set revision_required false
+   │  │    (design: docs/superpowers/specs/2026-08-04-loop-verifier-design.md)
    │  └─ reviser_agent (LlmAgent)  output_key: cv_draft   (overwrites!)
    └─ cv_presenter_agent (custom BaseAgent, NO LLM)      cv_agents/sub_agents/presenter/agent.py
       emits state `cv_draft` verbatim as the final event; saves it as
@@ -59,9 +64,11 @@ workflow containers (no LLM calls of their own). These names are what appear as
 3. "Improve my CV" request → root MUST call `load_customer_documents` and see
    `status="success"` BEFORE `transfer_to_agent(cv_writer_sequential_agent)`.
    Files missing → ask the user to upload; do not transfer.
-4. `writer_agent` drafts; then the loop runs critic → reviser up to 3 times.
-   The critic calls the built-in `exit_loop` tool to approve and terminate
-   early (max_iterations is a ceiling, not a quota).
+4. `writer_agent` drafts; then the loop runs critic → verifier → reviser up
+   to 3 times. The VERIFIER calls `exit_loop` to approve and terminate early
+   (max_iterations is a ceiling, not a quota); the critic cannot end the
+   loop. If the ceiling is hit with violations outstanding, the draft still
+   ships (blocking delivery is an open product decision).
 5. `cv_presenter_agent` ends every run by emitting the final `cv_draft`
    verbatim (deterministic, no LLM call) and saving it as artifact
    `improved_cv.md`. Rationale: once the critic gained `exit_loop`, an
@@ -80,7 +87,8 @@ ADK `{placeholder}` templating (strict: missing key ⇒ runtime error, by design
 | `customer_cv` | `load_customer_documents` (tool_context.state) | writer, critic, reviser |
 | `job_description` | `load_customer_documents` | writer, critic, reviser |
 | `cv_draft` | writer_agent AND reviser_agent (output_key) | critic, reviser |
-| `cv_criticism` | critic_agent (output_key) | reviser |
+| `cv_criticism` | critic_agent (output_key) | verifier, reviser |
+| `verifier_report` | verifier_agent (output_key; JSON violations or exit) | reviser |
 
 (`final_cv` — a former root-agent `output_key` — was removed: after a
 transfer the root never produced the CV, so the key stored chat text under a
