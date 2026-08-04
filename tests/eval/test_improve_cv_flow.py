@@ -28,8 +28,12 @@ SESSION_ID = "eval_improve_cv_flow"
 
 
 async def _load_example_artifacts(artifact_service):
-    for filename in ("sample_cv.txt", "sample_job_description.txt"):
-        content = (PROJECT_ROOT / "examples" / filename).read_bytes()
+    case_dir = PROJECT_ROOT / "examples" / "cases" / "senior-match"
+    for filename, case_file in (
+        ("sample_cv.txt", "cv.txt"),
+        ("sample_job_description.txt", "jd.txt"),
+    ):
+        content = (case_dir / case_file).read_bytes()
         await artifact_service.save_artifact(
             app_name=config.app_name,
             user_id=USER_ID,

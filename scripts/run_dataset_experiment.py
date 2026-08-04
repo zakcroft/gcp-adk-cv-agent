@@ -131,10 +131,28 @@ async def task(*, item, **kwargs) -> str:
 
 
 def main() -> None:
-    dataset_name = sys.argv[1] if len(sys.argv) > 1 else "regression-cases"
-    run_name = sys.argv[2] if len(sys.argv) > 2 else f"run-{datetime.now():%Y%m%d_%H%M%S}"
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("dataset", nargs="?", default="regression-cases")
+    parser.add_argument(
+        "run_name", nargs="?", default=f"run-{datetime.now():%Y%m%d_%H%M%S}",
+        help="name the run after WHAT CHANGED, like a commit message",
+    )
+    parser.add_argument(
+        "--items",
+        help="comma-separated item ids to run (e.g. case-sparse-cv); default all",
+    )
+    args = parser.parse_args()
+    dataset_name, run_name = args.dataset, args.run_name
 
     dataset = langfuse.get_dataset(dataset_name)
+    if args.items:
+        wanted = {i.strip() for i in args.items.split(",")}
+        dataset.items = [i for i in dataset.items if i.id in wanted]
+        missing = wanted - {i.id for i in dataset.items}
+        if missing:
+            sys.exit(f"unknown item ids: {', '.join(sorted(missing))}")
     print(f"Dataset '{dataset_name}': {len(dataset.items)} item(s). Running '{run_name}'...")
 
     result = dataset.run_experiment(

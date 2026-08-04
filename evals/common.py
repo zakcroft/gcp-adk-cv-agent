@@ -60,10 +60,8 @@ def source_documents(item_input) -> tuple[str, str] | None:
     no-files items. Plain-string inputs are the senior-match case; dict inputs
     carry a `case` id resolving to examples/cases/<case>/{cv,jd}.txt."""
     if isinstance(item_input, str):
-        return (
-            (PROJECT_ROOT / "examples" / "sample_cv.txt").read_text(),
-            (PROJECT_ROOT / "examples" / "sample_job_description.txt").read_text(),
-        )
+        case_dir = PROJECT_ROOT / "examples" / "cases" / "senior-match"
+        return ((case_dir / "cv.txt").read_text(), (case_dir / "jd.txt").read_text())
     case = item_input.get("case")
     if case is None:
         return None

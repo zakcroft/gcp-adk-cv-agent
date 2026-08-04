@@ -44,15 +44,16 @@ async def load_example_files_to_artifacts(
     user_id: str = "default_user",
     session_id: str = "default_session",
 ) -> None:
-    project_root = Path(__file__).parent
-    examples_dir = project_root / "examples"
+    # Documents come from the senior-match case (examples/cases/ is the single
+    # source of truth); artifact names stay sample_* — the tools expect them.
+    case_dir = Path(__file__).parent / "examples" / "cases" / "senior-match"
     example_files = [
-        ("sample_cv.txt", "text/plain"),
-        ("sample_job_description.txt", "text/plain"),
+        ("sample_cv.txt", "cv.txt", "text/plain"),
+        ("sample_job_description.txt", "jd.txt", "text/plain"),
     ]
 
-    for filename, mime_type in example_files:
-        path = examples_dir / filename
+    for filename, case_file, mime_type in example_files:
+        path = case_dir / case_file
         if not path.exists():
             logger.warning(f"Missing example file: {path}")
             continue

@@ -104,7 +104,10 @@ renders as `<not serializable>`).
 ### 3.4 Files / artifacts
 
 - Inputs live in the ADK **artifact service** (in-memory). `main.py` preloads
-  `examples/sample_cv.txt` and `examples/sample_job_description.txt` at startup.
+  the `senior-match` case documents (`examples/cases/senior-match/`) at
+  startup under the artifact names `sample_cv.txt` / `sample_job_description.txt`
+  (the tools expect those names). `examples/cases/` is the single source of
+  truth for all case documents.
 - `InMemorySessionService` + `InMemoryArtifactService`: all state/artifacts are
   lost when the process exits. Each `main.py` run is genuinely a new session
   (`SESSION_ID = session_<timestamp>` so Langfuse groups per run).
