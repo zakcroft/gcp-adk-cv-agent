@@ -143,10 +143,10 @@ Next (detailed in the build plan):
 2. Presenter metadata → the four source-document judges (dev + prod).
 3. Ground-truth case library (`examples/cases/`) + dataset sync script.
 4. Runner: per-case documents, `--run-name` flag.
-5. Guardrails (SPEC section 7 item 1a): block/repair at runtime what the
+5. Guardrails (SPEC section 7 item 2): block/repair at runtime what the
    judges can only measure afterwards — input sanity, prompt-injection
    defence, scope refusal, deterministic grounding + format gates, call
-   ceilings.
+   ceilings + per-call timeouts.
 6. Later (SPEC section 7): pytest env separation, ADK scores → Langfuse
    scores, user-simulation evals, ADK 2.x migration.
 

@@ -273,8 +273,11 @@ workflow is pytest + Langfuse traces as the single record.
      vs source CV, after the reviser; code cannot be argued with.
    - Output: format check in the presenter — plain-text CV, expected
      sections present, sane length.
-   - Runtime: loop cap DONE; bounded exponential backoff DONE; per-run
-     LLM-call ceiling still to add.
+   - Runtime: loop cap DONE; bounded exponential backoff DONE; still to add:
+     per-run LLM-call ceiling and a per-LLM-call timeout (2026-08-04: a
+     verifier call hung on a dead connection and stalled a dataset run for
+     100+ min — backoff only catches raised errors, not a call that never
+     returns).
 
 3. **Eval suite** — both lanes live (section 6): `relevance` (UI, live) +
    `correctness` (code, experiments). Config snapshot for recreating the UI
