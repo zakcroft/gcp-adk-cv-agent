@@ -19,10 +19,11 @@ logger = logging.getLogger(__name__)
 
 # Character counts, measured on the decoded str (not file bytes).
 # Floor: smallest real CV in examples/cases is 375 chars, so 200 leaves
-# headroom while rejecting junk. Ceiling: far above any real document;
-# bounds token cost. Also catches empty strings (len 0 < MIN_CHARS).
+# headroom while rejecting junk. Ceiling: a dense three-page CV from a
+# 20-year career measures ~10k chars; doubling that admits any real
+# document while bounding token cost. Also catches empty (len 0 < floor).
 MIN_CHARS = 200
-MAX_CHARS = 50_000
+MAX_CHARS = 20_000
 
 
 def check_readable(data: bytes, mime_type: str) -> bool:

@@ -266,12 +266,16 @@ workflow is pytest + Langfuse traces as the single record.
    gates) / `runtime.py` (cross-cutting limits, ADK Plugin). Organised by
    stage; deterministic checks first in each module, LLM-calling checks
    below a marked boundary. No ADK imports; callers wire them in. WIRED: `check_inputs` (readable:
-   text/plain + UTF-8; distinct: not the same content twice; size: 200–50k
-   chars per document) gates `load_customer_documents` — validation runs
+   text/plain + UTF-8; distinct: not the same content twice; size: 200–20k
+   chars per document, calibrated against a dense real three-page CV of
+   ~10k) gates `load_customer_documents` — validation runs
    BEFORE the state write; `check_inputs` is async and returns an
    `InputVerdict` (ok + per-check user-facing reason) that the tool relays
    in `status="error"` so the root agent asks for new files instead of
-   transferring. Last in the chain: `check_plausibility` (below the marked
+   transferring. Unit tests: `tests/guardrails/test_inputs.py` —
+   deterministic checks tested directly, Google clients faked for the
+   service-backed checks (verdict mapping, cost ordering, service-down
+   lets the upload continue). Last in the chain: `check_plausibility` (below the marked
    deterministic/LLM boundary in `inputs.py`) — one temperature-0
    gemini-2.5-flash call classifying document KIND only (CV? JD? covers
    swapped slots — a deterministic slot heuristic was tried and removed
@@ -345,6 +349,28 @@ workflow is pytest + Langfuse traces as the single record.
 9. **ADK eval scores → Langfuse scores** — attach
     `tool_trajectory_avg_score` / `response_match_score` via
     `langfuse.create_score()` so pytest judgments live next to traces.
+
+10. **PII pseudonymisation (production) — needs working out.** Real
+    contact details should never leave the machine: redact them to markers
+    before any external call, restore them locally on output.
+    - Redact in `load_customer_documents`, after the guardrail checks and
+      before the state write: email/phone/profile URLs by regex, the name
+      (usually the first non-empty line) with a local NER fallback —
+      redaction must be local or it defends nothing.
+    - Markers are distinct tokens (`{{NAME_1}}`, `{{EMAIL_1}}`) so contact
+      details keep their position; the pipeline never needs their values.
+    - The marker→value mapping must NEVER enter the traced path (no tool
+      return, no injected state — both end up in prompts and Langfuse).
+      In-process dict keyed by session; a multi-instance deployment would
+      need Redis or similar.
+    - Restore in the presenter (custom code, no LLM) before emitting and
+      saving the artifact.
+    - Bonus: traces, judge prompts and experiment records become PII-free.
+    - THE KNOWN ISSUE: markers must survive three rounds of LLM rewriting
+      — models mangle or drop odd tokens. Needs a "preserve `{{...}}`
+      markers exactly" rule in writer/reviser instructions AND a presenter
+      format check that every expected marker is present before restoring;
+      a draft that lost a marker is a broken CV.
 
 ## 8. Conventions
 
