@@ -143,10 +143,12 @@ Next (detailed in the build plan):
 2. Presenter metadata → the four source-document judges (dev + prod).
 3. Ground-truth case library (`examples/cases/`) + dataset sync script.
 4. Runner: per-case documents, `--run-name` flag.
-5. Guardrails (SPEC section 7 item 2): block/repair at runtime what the
-   judges can only measure afterwards — input sanity, prompt-injection
-   defence, scope refusal, deterministic grounding + format gates, call
-   ceilings + per-call timeouts.
+5. Guardrails (SPEC section 7 item 2): LARGELY DONE 2026-08-06 — input
+   chain (sanity, plausibility, Model Armor injection screening), output
+   gates (grounding, format) in the presenter, runtime plugin (call
+   ceiling, per-call timeout). Remaining: data-not-instructions rule in
+   agent instructions, injection case in `regression-cases`, out-of-scope
+   live evaluator.
 6. Later (SPEC section 7): pytest env separation, ADK scores → Langfuse
    scores, user-simulation evals, ADK 2.x migration.
 

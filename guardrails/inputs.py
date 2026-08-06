@@ -17,13 +17,7 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-# Character counts, measured on the decoded str (not file bytes).
-# Floor: smallest real CV in examples/cases is 375 chars, so 200 leaves
-# headroom while rejecting junk. Ceiling: a dense three-page CV from a
-# 20-year career measures ~10k chars; doubling that admits any real
-# document while bounding token cost. Also catches empty (len 0 < floor).
-MIN_CHARS = 200
-MAX_CHARS = 20_000
+from guardrails.limits import MAX_DOC_CHARS, MIN_DOC_CHARS
 
 
 def check_readable(data: bytes, mime_type: str) -> bool:
@@ -42,7 +36,7 @@ def check_size(cv_text: str, jd_text: str) -> bool:
     to be sane."""
     for text in (cv_text, jd_text):
         n = len(text.strip())
-        if n < MIN_CHARS or n > MAX_CHARS:
+        if n < MIN_DOC_CHARS or n > MAX_DOC_CHARS:
             return False
     return True
 

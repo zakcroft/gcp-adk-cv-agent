@@ -18,6 +18,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from cv_agents.agent import root_agent
+from guardrails.runtime import GuardrailsPlugin
 from cv_agents.config import Config
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -57,6 +58,7 @@ async def test_improve_cv_happy_path():
         app_name=config.app_name,
         artifact_service=artifact_service,
         session_service=session_service,
+        plugins=[GuardrailsPlugin()],
     )
 
     msg = types.Content(

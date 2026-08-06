@@ -43,6 +43,7 @@ from google.genai import types
 from evals import ALL_EVALUATORS
 
 from cv_agents.agent import root_agent
+from guardrails.runtime import GuardrailsPlugin
 
 PROJECT_ROOT = Path(__file__).parent.parent
 USER_ID = "experiment_user"
@@ -98,6 +99,7 @@ async def run_pipeline(message: str, artifacts) -> str:
         app_name=config.app_name,
         artifact_service=artifact_service,
         session_service=session_service,
+        plugins=[GuardrailsPlugin()],
     )
 
     final_text = ""

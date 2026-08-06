@@ -14,6 +14,8 @@ from google.adk.agents import BaseAgent, InvocationContext
 from google.adk.events import Event
 from google.genai import types
 
+from guardrails import check_format, check_grounding
+
 logger = logging.getLogger(__name__)
 
 CV_ARTIFACT_FILENAME = "improved_cv.md"
@@ -30,6 +32,27 @@ class CvPresenterAgent(BaseAgent):
             yield self._text_event(ctx, "No CV draft was produced by the workflow.")
             return
 
+        # Output guardrails: deterministic checks the loop's LLM verifier
+        # cannot be argued out of. Format problems are logged; grounding
+        # violations are surfaced to the user under the CV (the artifact
+        # stays the pure CV) — the loop is over, so honesty beats silence.
+        for problem in check_format(cv_draft):
+            logger.warning(f"cv_presenter format check: {problem}")
+
+        note = ""
+        customer_cv = ctx.session.state.get("customer_cv", "")
+        if customer_cv:
+            violations = check_grounding(
+                cv_draft, customer_cv, ctx.session.state.get("job_description", "")
+            )
+            if violations:
+                logger.warning(f"cv_presenter grounding violations: {violations}")
+                note = (
+                    "\n\n---\nPlease verify before using this CV: the following "
+                    "terms do not appear in your original CV or the job "
+                    "description: " + ", ".join(violations)
+                )
+
         if ctx.artifact_service is not None:
             version = await ctx.artifact_service.save_artifact(
                 app_name=ctx.app_name,
@@ -42,7 +65,7 @@ class CvPresenterAgent(BaseAgent):
             )
             logger.info(f"Saved final CV as '{CV_ARTIFACT_FILENAME}' (version {version})")
 
-        yield self._text_event(ctx, cv_draft)
+        yield self._text_event(ctx, cv_draft + note)
 
     def _text_event(self, ctx: InvocationContext, text: str) -> Event:
         return Event(

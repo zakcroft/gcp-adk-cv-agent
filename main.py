@@ -10,6 +10,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from cv_agents.agent import root_agent
+from guardrails.runtime import GuardrailsPlugin
 from cv_agents.config import Config
 
 from langfuse import get_client
@@ -145,6 +146,7 @@ async def main():
         app_name=config.app_name,
         artifact_service=artifact_service,
         session_service=session_service,
+        plugins=[GuardrailsPlugin()],
     )
 
     print("\n" + "=" * 60)
