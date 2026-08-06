@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "google-adk[eval]>=1.17.0",
     "google-cloud-aiplatform>=1.122.0",
+    "google-cloud-modelarmor>=0.7.1",
     "langfuse>=4.14.0",
     "openinference-instrumentation-google-adk>=0.1.17",
     "pydantic>=2.12.3",

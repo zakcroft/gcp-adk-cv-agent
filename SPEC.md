@@ -277,9 +277,15 @@ workflow is pytest + Langfuse traces as the single record.
    swapped slots — a deterministic slot heuristic was tried and removed
    2026-08-06 as fragile), strict JSON via `response_schema`, 1500-char
    excerpts, FAILS OPEN on model errors.
-   - Input: prompt-injection defence — document content is data, never
-     instructions; explicit rule in agent instructions + an injection test
-     case in `regression-cases`.
+   - Input: prompt-injection defence — WIRED via Model Armor
+     (`check_injection`, last in the chain): template `cv-agent-docs` in
+     `europe-west4` (injection/jailbreak HIGH, basic Sensitive Data
+     Protection on, content filters HIGH, text only, enforcement
+     INSPECT_AND_BLOCK — required, or the API omits match results), free
+     tier 2M tokens/month, regional endpoint required. Screening service
+     down → log and continue. Still to do: the explicit data-not-
+     instructions rule in agent instructions + an injection test case in
+     `regression-cases`.
    - Scope: root agent declines non-CV requests (instruction now;
      out-of-scope live evaluator later).
    - Output: grounding gate — deterministic technology/term diff of output

@@ -1,14 +1,17 @@
 """Input validation — called from load_customer_documents before state is
 written.
 
-Two tiers, in the order the tool runs them:
-1. Deterministic checks (free, pure, no dependencies) — check_inputs.
-2. LLM plausibility (one flash call, fails open) — check_plausibility.
+The check_inputs entry point runs everything in cost order: deterministic
+checks first (free, pure), then the plausibility classifier (one flash
+call), then Model Armor injection screening (free tier). If a service-backed
+check is unavailable it logs and lets the upload continue.
 """
 
 import logging
+import os
 
 from google import genai
+from google.cloud import modelarmor_v1
 from google.genai import types
 from pydantic import BaseModel, Field
 
@@ -58,25 +61,35 @@ class InputVerdict(BaseModel):
 
 async def check_inputs(cv_data: bytes, cv_mime: str, jd_data: bytes, jd_mime: str) -> InputVerdict:
     """THE entry point: every input check in order, cheapest first — bytes
-    checks gate the decode, string checks next, the LLM check last so it
-    only spends a model call on inputs that already passed the free tier."""
+    checks gate the decode, string checks next, the service-backed checks
+    last so they only spend calls on inputs that already passed the free
+    tier."""
+    # Plain text that decodes as UTF-8? Must pass before decoding is safe.
     if not check_readable(cv_data, cv_mime) or not check_readable(jd_data, jd_mime):
         return InputVerdict(ok=False, reason="Files must be plain text (not PDF or Word).")
 
     cv_text = cv_data.decode("utf-8")
     jd_text = jd_data.decode("utf-8")
 
+    # Same file uploaded twice? Then one slot is not what it claims to be.
     if not check_duplicates(cv_text, jd_text):
         return InputVerdict(ok=False, reason="Both files contain the same content.")
+
+    # Each document between 200 and 50,000 characters (catches empty too).
     if not check_size(cv_text, jd_text):
         return InputVerdict(
             ok=False, reason="Each document must be roughly a paragraph to a few pages long."
         )
 
+    # Is document A actually a CV, and B actually a job description?
+    # One temperature-0 flash call; also catches the two files being swapped.
     verdict = await check_plausibility(cv_text, jd_text)
     if not (verdict.cv_ok and verdict.jd_ok):
         return InputVerdict(ok=False, reason=verdict.reason)
-    return InputVerdict(ok=True)
+
+    # Model Armor screening: reject content that tries to steer the model
+    # (prompt injection or jailbreak text hidden in a document).
+    return await check_injection(cv_text, jd_text)
 
 
 # ---------------------------------------------------------------------------
@@ -140,3 +153,49 @@ async def check_plausibility(cv_text: str, jd_text: str) -> PlausibilityVerdict:
     except Exception as e:
         logger.warning(f"Plausibility check unavailable, failing open: {e}")
         return PlausibilityVerdict(cv_ok=True, jd_ok=True, reason="")
+
+
+# Model Armor: screens the documents for prompt-injection and jailbreak
+# content. The template (filters, thresholds) lives in GCP and can be
+# tuned without code changes: projects/<project>/locations/europe-west4/
+# templates/cv-agent-docs. The regional endpoint is required — the global
+# one returns 404 for a regional template.
+_ARMOR_LOCATION = "europe-west4"
+_ARMOR_TEMPLATE_ID = "cv-agent-docs"
+
+
+async def check_injection(cv_text: str, jd_text: str) -> InputVerdict:
+    """Screen both documents with Model Armor: document content is data and
+    must never be treated as instructions, so anything that reads as an
+    attempt to steer the model is rejected before it reaches session state.
+
+    If the screening service itself is unavailable, log a warning and let
+    the upload continue — turning away every user because the checker is
+    down would be worse than the risk it covers for a single-user app."""
+    project = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+    try:
+        client = modelarmor_v1.ModelArmorAsyncClient(
+            client_options={"api_endpoint": f"modelarmor.{_ARMOR_LOCATION}.rep.googleapis.com"}
+        )
+        template = (
+            f"projects/{project}/locations/{_ARMOR_LOCATION}/templates/{_ARMOR_TEMPLATE_ID}"
+        )
+        for label, text in (("CV", cv_text), ("job description", jd_text)):
+            response = await client.sanitize_user_prompt(
+                request=modelarmor_v1.SanitizeUserPromptRequest(
+                    name=template,
+                    user_prompt_data=modelarmor_v1.DataItem(text=text),
+                )
+            )
+            state = response.sanitization_result.filter_match_state
+            if state == modelarmor_v1.FilterMatchState.MATCH_FOUND:
+                logger.warning(f"Model Armor flagged the {label}.")
+                return InputVerdict(
+                    ok=False,
+                    reason=f"The {label} contains content that looks like an attempt "
+                    "to manipulate the system.",
+                )
+        return InputVerdict(ok=True)
+    except Exception as e:
+        logger.warning(f"Injection screening unavailable, letting the upload continue: {e}")
+        return InputVerdict(ok=True)
