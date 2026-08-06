@@ -4,7 +4,7 @@ john.smith@email.com | +44 7700 900000 | London, UK
 LinkedIn: linkedin.com/in/johnsmith | GitHub: github.com/johnsmith
 
 PROFESSIONAL SUMMARY
-Backend-focused software engineer with 5 years of experience building APIs and maintaining databases using Python and JavaScript. Hands-on with Django, PostgreSQL and REST API development, including payment-processing integration from project work. Experienced across the delivery cycle — code reviews, deployment processes, Docker and AWS — and looking to apply this backend experience to scaling payment infrastructure at InnovateTech Solutions.
+Backend-focused software engineer with 5 years of experience building APIs and maintaining databases using Python and JavaScript. Hands-on with Django, PostgreSQL and REST API development, including payment-processing integration from project work. Experienced across the delivery cycle — code reviews, deployment processes, Docker and AWS — and looking to apply this backend experience to scaling payment infrastructure.
 
 EXPERIENCE
 

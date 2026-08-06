@@ -292,15 +292,30 @@ workflow is pytest + Langfuse traces as the single record.
      `regression-cases`.
    - Scope: root agent declines non-CV requests (instruction now;
      out-of-scope live evaluator later).
-   - Output: grounding gate — deterministic technology/term diff of output
-     vs source CV, after the reviser; code cannot be argued with.
-   - Output: format check in the presenter — plain-text CV, expected
-     sections present, sane length.
-   - Runtime: loop cap DONE; bounded exponential backoff DONE; still to add:
-     per-run LLM-call ceiling and a per-LLM-call timeout (2026-08-04: a
-     verifier call hung on a dead connection and stalled a dataset run for
-     100+ min — backoff only catches raised errors, not a call that never
-     returns).
+   - Output: WIRED — `check_grounding` + `check_format` (`outputs.py`, both
+     return problem lists) run in the presenter before emitting.
+     Grounding: deterministic term diff of the draft against source CV +
+     JD — flags technical-shaped tokens and mid-sentence capitalised names
+     that appear in neither; calibrated so every hand-curated
+     `expected_output.md` passes clean (enforced as a parametrised test).
+     Scope: catches terms invented from NOWHERE; whether JD vocabulary is
+     dishonestly claimed as experience is meaning, and stays with the loop
+     verifier + judges. On violations the presenter appends a "please
+     verify these terms" note to the chat text (artifact stays the pure
+     CV; the loop is over, so honesty beats silence). Format: size window
+     (shared with the input gate via `limits.py`) + markdown-artifact
+     detection; problems are logged. Tests:
+     `tests/guardrails/test_outputs.py`.
+   - Runtime: WIRED — `GuardrailsPlugin` (`runtime.py`), registered on all
+     three Runners (`main.py`, experiment runner, integration test; NOT
+     `adk web`, which builds its own Runner). Per-run LLM-call ceiling of
+     25 (worst case is ~15; breach raises `CallCeilingExceeded` — a loud
+     stop, quota is the casualty otherwise) and a 120s per-call timeout
+     stamped on every request via `http_options` (2026-08-04: a verifier
+     call hung on a dead connection and stalled a dataset run for 100+
+     min — backoff only catches raised errors, not a call that never
+     returns). Loop cap and bounded exponential backoff were already in
+     place. Tests: `tests/guardrails/test_runtime.py`.
 
 3. **Eval suite** — both lanes live (section 6): `relevance` (UI, live) +
    `correctness` (code, experiments). Config snapshot for recreating the UI
@@ -380,6 +395,8 @@ workflow is pytest + Langfuse traces as the single record.
   `tests/`, the hook prompts the agent once per change-set to reconcile this
   file. Update SPEC.md when changes are meaningful; say so briefly when not.
 - British English in all agent-facing prose and generated CVs.
+- Generated CVs must not LOOK tailored: never name the target company or
+  vacancy (writer prompt v2, 2026-08-06; expected outputs curated to match).
 - Commit style: imperative subject + bulleted body; NO Claude co-author
   trailer. Author identity: `Zak Croft <1917622+zakcroft@users.noreply.github.com>`.
 - Never `git push` and never delete files unless the owner explicitly asks.

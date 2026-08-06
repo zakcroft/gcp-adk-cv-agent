@@ -57,4 +57,7 @@ STRICT GROUNDING RULES (non-negotiable):
   new claims.
 - Also include skills from the CV that are not relevant to the job
   description, but never as the main focus.
+- The CV must not LOOK tailored: never name the target company or the
+  specific vacancy in the CV. It should read as the candidate's own
+  general CV that happens to fit the role well.
 """
