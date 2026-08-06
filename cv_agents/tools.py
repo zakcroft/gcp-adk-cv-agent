@@ -68,17 +68,20 @@ async def load_customer_documents(tool_context: ToolContext) -> dict:
                 status="error",
             ).model_dump()
 
-        # Guardrail: validate BEFORE anything is written to state
-        if not check_inputs(cv_part.data, cv_part.mime_type, job_part.data, job_part.mime_type):
-            logger.warning("Input validation failed for uploaded files.")
+        # Guardrail: all input checks run BEFORE anything is written to state
+        verdict = await check_inputs(
+            cv_part.data, cv_part.mime_type, job_part.data, job_part.mime_type
+        )
+        if not verdict.ok:
+            logger.warning(f"Input validation failed: {verdict.reason}")
             return DocumentsResult(
                 customer_cv="",
                 job_description="",
                 cv_filename="",
                 job_filename="",
                 error=(
-                    "The uploaded files failed validation. Please upload your CV and the "
-                    "job description as plain text files of a reasonable length."
+                    f"There is a problem with the uploaded files: {verdict.reason} "
+                    "Please upload your CV and the job description you are applying for."
                 ),
                 status="error",
             ).model_dump()
