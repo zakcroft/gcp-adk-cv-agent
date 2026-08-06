@@ -11,6 +11,7 @@ from google.genai import types
 
 from cv_agents.agent import root_agent
 from guardrails.runtime import GuardrailsPlugin
+from cv_agents.debug_plugin import maybe_debug_plugins
 from cv_agents.config import Config
 
 from langfuse import get_client
@@ -146,7 +147,7 @@ async def main():
         app_name=config.app_name,
         artifact_service=artifact_service,
         session_service=session_service,
-        plugins=[GuardrailsPlugin()],
+        plugins=[GuardrailsPlugin(), *maybe_debug_plugins()],
     )
 
     print("\n" + "=" * 60)

@@ -44,6 +44,7 @@ from evals import ALL_EVALUATORS
 
 from cv_agents.agent import root_agent
 from guardrails.runtime import GuardrailsPlugin
+from cv_agents.debug_plugin import maybe_debug_plugins
 
 PROJECT_ROOT = Path(__file__).parent.parent
 USER_ID = "experiment_user"
@@ -99,7 +100,7 @@ async def run_pipeline(message: str, artifacts) -> str:
         app_name=config.app_name,
         artifact_service=artifact_service,
         session_service=session_service,
-        plugins=[GuardrailsPlugin()],
+        plugins=[GuardrailsPlugin(), *maybe_debug_plugins()],
     )
 
     final_text = ""

@@ -180,6 +180,10 @@ it before creating clients/instrumentation. Auth is gcloud ADC
 - Trace anatomy: `invocation` → `agent_run [name]` → `call_llm` / tool spans.
   Tool results return to the model as `function_response` messages — visible in
   the NEXT `call_llm`'s input. Workflow-agent spans never have own `call_llm`s.
+- Local hook diagnostics: `CV_AGENT_DEBUG=1` registers `DebugContextPlugin`
+  (`cv_agents/debug_plugin.py`) which logs every run/agent/model/tool hook
+  with its context fields — for learning the ADK object structure; off and
+  unregistered by default.
 
 ## 6. Evaluation
 
