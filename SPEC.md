@@ -261,9 +261,18 @@ workflow is pytest + Langfuse traces as the single record.
    `improved_cv.md` as an artifact and ends every run with the CV text.
 
 2. **Guardrails** — checks that block or repair at runtime (judges only
-   measure after the fact). Planned:
-   - Input: uploaded files are plausibly a CV and a JD (type, size, sanity)
-     — code + small LLM check before `load_customer_documents` succeeds.
+   measure after the fact). Home: top-level `guardrails/` package —
+   `inputs.py` (plain upload validation) / `outputs.py` (model-behaviour
+   gates) / `runtime.py` (cross-cutting limits, ADK Plugin). Pure functions,
+   no ADK imports; callers wire them in. WIRED: `check_inputs` (readable:
+   text/plain + UTF-8; distinct: not the same content twice; size: 200–50k
+   chars per document) gates `load_customer_documents` — validation runs
+   BEFORE the state write, and failure returns `status="error"` so the root
+   agent asks for new files instead of transferring. A slot-order heuristic
+   was tried and removed 2026-08-06: speculative failure, heuristic
+   fragility — plausibility (below) subsumes it. Planned:
+   - Input: plausibility — files really are a CV and a JD (which also
+     covers swapped `artifacts[0]`/`[1]` order).
    - Input: prompt-injection defence — document content is data, never
      instructions; explicit rule in agent instructions + an injection test
      case in `regression-cases`.

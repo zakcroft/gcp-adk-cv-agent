@@ -8,6 +8,8 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.tools import ToolContext
 from google.genai import types
 
+from guardrails import check_inputs
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,25 +51,40 @@ async def load_customer_documents(tool_context: ToolContext) -> dict:
 
         cv_filename = artifacts[0]
         job_filename = artifacts[1]
-        cv_text = ""
-        job_text = ""
 
-        #  CV
         cv_artifact_part = await tool_context.load_artifact(cv_filename)
-
-        if cv_artifact_part and cv_artifact_part.inline_data:
-            cv_text = cv_artifact_part.inline_data.data.decode("utf-8")
-        else:
-            logger.warning(f"Artifact '{cv_filename}' not found.")
-
-        # job description
         job_artifact_part = await tool_context.load_artifact(job_filename)
+        cv_part = cv_artifact_part.inline_data if cv_artifact_part else None
+        job_part = job_artifact_part.inline_data if job_artifact_part else None
 
-        if job_artifact_part and job_artifact_part.inline_data:
-            job_text = job_artifact_part.inline_data.data.decode("utf-8")
-        else:
-            logger.warning(f"Artifact '{job_filename}' not found.")
+        if cv_part is None or job_part is None:
+            logger.warning(f"Could not read '{cv_filename}' and/or '{job_filename}'.")
+            return DocumentsResult(
+                customer_cv="",
+                job_description="",
+                cv_filename="",
+                job_filename="",
+                error="Could not read the uploaded files. Please upload them again.",
+                status="error",
+            ).model_dump()
 
+        # Guardrail: validate BEFORE anything is written to state
+        if not check_inputs(cv_part.data, cv_part.mime_type, job_part.data, job_part.mime_type):
+            logger.warning("Input validation failed for uploaded files.")
+            return DocumentsResult(
+                customer_cv="",
+                job_description="",
+                cv_filename="",
+                job_filename="",
+                error=(
+                    "The uploaded files failed validation. Please upload your CV and the "
+                    "job description as plain text files of a reasonable length."
+                ),
+                status="error",
+            ).model_dump()
+
+        cv_text = cv_part.data.decode("utf-8")
+        job_text = job_part.data.decode("utf-8")
         logger.info(f"Loaded CV ({len(cv_text)} chars) and job description ({len(job_text)} chars)")
 
         # Persist to session state so sub-agent instructions can inject them
