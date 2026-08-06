@@ -112,9 +112,9 @@ renders as `<not serializable>`).
 ### 3.4 Files / artifacts
 
 - Inputs live in the ADK **artifact service** (in-memory). `main.py` preloads
-  the `senior-match` case documents (`examples/cases/senior-match/`) at
+  the `senior-match` case documents (`examples/regression-cases/senior-match/`) at
   startup under the artifact names `sample_cv.txt` / `sample_job_description.txt`
-  (the tools expect those names). `examples/cases/` is the single source of
+  (the tools expect those names). `examples/regression-cases/` is the single source of
   truth for all case documents.
 - `InMemorySessionService` + `InMemoryArtifactService`: all state/artifacts are
   lost when the process exits. Each `main.py` run is genuinely a new session
@@ -196,7 +196,7 @@ Three complementary layers (see also
   REAL pipeline over Langfuse dataset `regression-cases` and scores each
   item with the in-code judge suite (`evals/`). Item input is
   `{"message": str, "case": str|null}`; `case` names a directory under
-  `examples/cases/<case>/` (cv.txt + jd.txt + expected_output.md) whose
+  `examples/regression-cases/<case>/` (cv.txt + jd.txt + expected_output.md) whose
   documents the runner preloads per item (`resolve_item`); `case: null` =
   a no-files conversation item. `scripts/sync_dataset.py` syncs items from
   the case library + the ADK evalset (one source of truth). The judge
@@ -291,9 +291,12 @@ workflow is pytest + Langfuse traces as the single record.
      Protection on, content filters HIGH, text only, enforcement
      INSPECT_AND_BLOCK — required, or the API omits match results), free
      tier 2M tokens/month, regional endpoint required. Screening service
-     down → log and continue. Still to do: the explicit data-not-
-     instructions rule in agent instructions + an injection test case in
-     `regression-cases`.
+     down → log and continue. Guardrail-attacking regression cases DONE
+     2026-08-06: `case-injection-attack` (poisoned CV → expects the
+     rejection) and `case-not-a-cv` (project report in the CV slot →
+     expects the plausibility rejection); per-CV judges correctly skip
+     these (no presenter span). Still to do: the explicit
+     data-not-instructions rule in agent instructions.
    - Scope: root agent declines non-CV requests (instruction now;
      out-of-scope live evaluator later).
    - Output: WIRED — `check_grounding` + `check_format` (`outputs.py`, both
@@ -330,18 +333,18 @@ workflow is pytest + Langfuse traces as the single record.
    (Faithfulness, Hallucination, Completeness, Job-tailoring) per
    `2026-07-31-eval-suite-design.md` — needs the presenter-metadata spike.
 
-4. **Grow `regression-cases`** — 1 item today (expected output hand-curated 2026-08-01:
-   fabrications stripped, titles kept honest — every fact grounded in the
-   original CV; expected outputs must pass the same faithfulness bar as the pipeline).
-   Claude drafts the new CV/JD pairs + expected outputs; owner reviews. Planned cases:
-   - 2–3 CV/JD pairs across industries and seniority levels
-   - a sparse CV (little to work with — does the pipeline invent to
-     compensate? the fabrication problem as a test case)
-   - a mismatched CV/JD pair (does tailoring stay honest?)
-   - no-files cases (expected output = the "please upload" reply; reuse
-     `cv_agent.evalset.json` wording)
-   Prereq for multi-pair items: items must carry/name their own documents and
-   the runner must load them per item (today it always loads the sample pair).
+4. **Grow `regression-cases`** — DONE and living. 10 items today: six
+   CV/JD pairs (`senior-match`, `senior-frontend`, `agentic-ai`,
+   `career-switch` mismatch-honesty, `sparse-cv` invention-pressure,
+   `overqualified` omission-pressure), two no-files conversation items, and
+   two guardrail-attacking items (`injection-attack`, `not-a-cv` — expected
+   output is the refusal). Source of truth: `examples/regression-cases/`
+   (folder renamed from `examples/cases` 2026-08-06); `sync_dataset.py`
+   upserts (new cases need a message in its `CASE_MESSAGES`). Standing
+   rules: expected outputs pass the same faithfulness bar as the pipeline
+   (hand-curated, every fact grounded); the grounding gate's parametrised
+   test enforces expected outputs stay clean. Grow from real traces as new
+   failure modes appear.
 
 5. **User-simulation evals** — ADK `ConversationScenario` (persona +
    conversation_plan) for multi-turn robustness; experimental in ADK 1.17.

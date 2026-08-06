@@ -1,0 +1,20 @@
+Mid-level Software Engineer
+Ferrybridge Systems | Leeds, UK | Full-time
+
+About the role:
+We're looking for a mid-level software engineer to join our platform team.
+You'll build and maintain web services in Python, work closely with our
+front-end developers, and help keep our PostgreSQL databases healthy.
+
+Key responsibilities:
+• Develop and maintain Django-based services
+• Collaborate with front-end engineers working in React
+• Write tests and take part in code review
+• Support production systems, including occasional on-call
+
+Requirements:
+• 3+ years of professional software development experience
+• Solid Python, ideally with Django
+• Working knowledge of JavaScript and React
+• Experience with relational databases, ideally PostgreSQL
+• Familiarity with Git and standard code-review workflows

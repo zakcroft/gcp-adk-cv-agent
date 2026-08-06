@@ -1,6 +1,6 @@
 """Unit tests for the output guardrails, plus the presenter's use of them.
 
-check_grounding's thresholds were calibrated against examples/cases: every
+check_grounding's thresholds were calibrated against examples/regression-cases: every
 hand-curated expected output must pass clean against its own CV and JD —
 that invariant is enforced here so case-library growth keeps the gate
 honest.
@@ -12,7 +12,7 @@ import pytest
 
 from guardrails.outputs import check_format, check_grounding
 
-CASES = sorted(p for p in Path("examples/cases").iterdir() if p.is_dir())
+CASES = sorted(p for p in Path("examples/regression-cases").iterdir() if p.is_dir())
 
 SOURCE_CV = (
     "John Smith\nSoftware Engineer\n\nEXPERIENCE\n"

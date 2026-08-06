@@ -58,14 +58,14 @@ def judge(score_name: str, prompt_name: str, **variables) -> Evaluation:
 def source_documents(item_input) -> tuple[str, str] | None:
     """Resolve (customer_cv, job_description) for a dataset item, or None for
     no-files items. Plain-string inputs are the senior-match case; dict inputs
-    carry a `case` id resolving to examples/cases/<case>/{cv,jd}.txt."""
+    carry a `case` id resolving to examples/regression-cases/<case>/{cv,jd}.txt."""
     if isinstance(item_input, str):
-        case_dir = PROJECT_ROOT / "examples" / "cases" / "senior-match"
+        case_dir = PROJECT_ROOT / "examples" / "regression-cases" / "senior-match"
         return ((case_dir / "cv.txt").read_text(), (case_dir / "jd.txt").read_text())
     case = item_input.get("case")
     if case is None:
         return None
-    case_dir = PROJECT_ROOT / "examples" / "cases" / case
+    case_dir = PROJECT_ROOT / "examples" / "regression-cases" / case
     return ((case_dir / "cv.txt").read_text(), (case_dir / "jd.txt").read_text())
 
 

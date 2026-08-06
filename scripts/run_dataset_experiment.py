@@ -48,7 +48,7 @@ from cv_agents.debug_plugin import maybe_debug_plugins
 
 PROJECT_ROOT = Path(__file__).parent.parent
 USER_ID = "experiment_user"
-CASES_DIR = PROJECT_ROOT / "examples" / "cases"
+CASES_DIR = PROJECT_ROOT / "examples" / "regression-cases"
 # Uploaded-file names the tools expect; every case supplies both under these names
 ARTIFACT_NAMES = ("sample_cv.txt", "sample_job_description.txt")
 CASE_FILES = ("cv.txt", "jd.txt")
@@ -57,7 +57,7 @@ CASE_FILES = ("cv.txt", "jd.txt")
 def resolve_item(item_input):
     """Map a dataset item input to (message, [(artifact_name, bytes), ...]).
 
-    Dict inputs carry a `case` id resolving to examples/cases/<case>/;
+    Dict inputs carry a `case` id resolving to examples/regression-cases/<case>/;
     `case: None` = no-files conversation item. Plain strings are the legacy
     senior-match shape."""
     if isinstance(item_input, str):

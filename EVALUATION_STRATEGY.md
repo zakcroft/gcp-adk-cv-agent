@@ -141,7 +141,7 @@ Next (detailed in the build plan):
 1. Anti-fabrication rules in writer/reviser/critic prompts — expect
    `correctness` to climb from the 0.1 baseline.
 2. Presenter metadata → the four source-document judges (dev + prod).
-3. Ground-truth case library (`examples/cases/`) + dataset sync script.
+3. Ground-truth case library (`examples/regression-cases/`) + dataset sync script.
 4. Runner: per-case documents, `--run-name` flag.
 5. Guardrails (SPEC section 7 item 2): LARGELY DONE 2026-08-06 — input
    chain (sanity, plausibility, Model Armor injection screening), output
