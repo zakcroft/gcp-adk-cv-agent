@@ -295,8 +295,9 @@ workflow is pytest + Langfuse traces as the single record.
      2026-08-06: `case-injection-attack` (poisoned CV → expects the
      rejection) and `case-not-a-cv` (project report in the CV slot →
      expects the plausibility rejection); per-CV judges correctly skip
-     these (no presenter span). Still to do: the explicit
-     data-not-instructions rule in agent instructions.
+     these (no presenter span). Data-not-instructions rule DONE 2026-08-06:
+     SECURITY RULE block in the root instruction and all four sub-agent
+     prompts (writer v3, critic v3, reviser v3, verifier v2 in Langfuse).
    - Scope: root agent declines non-CV requests (instruction now;
      out-of-scope live evaluator later).
    - Output: WIRED — `check_grounding` + `check_format` (`outputs.py`, both
@@ -331,7 +332,13 @@ workflow is pytest + Langfuse traces as the single record.
    `$.new_message.parts[0].text`, `generation` ← Output
    `$.content.parts[0].text`. NEXT: the four truthfulness judges
    (Faithfulness, Hallucination, Completeness, Job-tailoring) per
-   `2026-07-31-eval-suite-design.md` — needs the presenter-metadata spike.
+   `2026-07-31-eval-suite-design.md`. Presenter-metadata code is DONE
+   2026-08-06 (`_attach_judge_metadata`: `customer_cv`/`job_description`
+   from state onto the presenter span via OTel attributes, 20k cap,
+   graceful when absent; unit-tested). Remaining: confirm the metadata on
+   one live trace, then create the four evaluators in the UI (filter
+   `name = agent_run [cv_presenter_agent]`, context ← Metadata
+   `$.customer_cv` / `$.job_description`).
 
 4. **Grow `regression-cases`** — DONE and living. 10 items today: six
    CV/JD pairs (`senior-match`, `senior-frontend`, `agentic-ai`,

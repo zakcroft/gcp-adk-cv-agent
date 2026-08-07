@@ -13,12 +13,20 @@ from typing import AsyncGenerator
 from google.adk.agents import BaseAgent, InvocationContext
 from google.adk.events import Event
 from google.genai import types
+from opentelemetry import trace as otel_trace
 
 from guardrails import check_format, check_grounding
 
 logger = logging.getLogger(__name__)
 
 CV_ARTIFACT_FILENAME = "improved_cv.md"
+
+# Langfuse live evaluators can only map variables from the one observation
+# they match. The judges match THIS agent's span (it carries the final CV),
+# but they also need the source documents — so we copy those from state
+# onto the span as metadata (eval-suite design 2026-07-31, section 3).
+_JUDGE_CONTEXT_KEYS = ("customer_cv", "job_description")
+_METADATA_MAX_CHARS = 20_000
 
 
 class CvPresenterAgent(BaseAgent):
@@ -31,6 +39,8 @@ class CvPresenterAgent(BaseAgent):
             logger.warning("cv_presenter: no cv_draft in session state")
             yield self._text_event(ctx, "No CV draft was produced by the workflow.")
             return
+
+        self._attach_judge_metadata(ctx)
 
         # Output guardrails: deterministic checks the loop's LLM verifier
         # cannot be argued out of. Format problems are logged; grounding
@@ -66,6 +76,20 @@ class CvPresenterAgent(BaseAgent):
             logger.info(f"Saved final CV as '{CV_ARTIFACT_FILENAME}' (version {version})")
 
         yield self._text_event(ctx, cv_draft + note)
+
+    def _attach_judge_metadata(self, ctx: InvocationContext) -> None:
+        """Copy the source documents from state onto this agent's span so
+        the live judges can read them. Graceful when state or the span is
+        missing — metadata is additive, never a reason to fail a run."""
+        span = otel_trace.get_current_span()
+        if span is None or not span.is_recording():
+            return
+        for key in _JUDGE_CONTEXT_KEYS:
+            value = ctx.session.state.get(key, "")
+            if value:
+                span.set_attribute(
+                    f"langfuse.observation.metadata.{key}", value[:_METADATA_MAX_CHARS]
+                )
 
     def _text_event(self, ctx: InvocationContext, text: str) -> Event:
         return Event(

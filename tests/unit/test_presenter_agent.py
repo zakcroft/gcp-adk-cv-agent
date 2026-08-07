@@ -4,6 +4,8 @@ as a downloadable artifact, so every run ends with the CV regardless of how
 the reviser loop exited (critic exit_loop approval vs max_iterations).
 """
 
+from types import SimpleNamespace
+
 import pytest
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.artifacts import InMemoryArtifactService
@@ -80,3 +82,49 @@ def test_root_agent_has_no_misleading_final_cv_output_key():
     from cv_agents.agent import root_agent
 
     assert root_agent.output_key is None
+
+
+class _FakeSpan:
+    def __init__(self, recording=True):
+        self.attributes = {}
+        self._recording = recording
+
+    def is_recording(self):
+        return self._recording
+
+    def set_attribute(self, key, value):
+        self.attributes[key] = value
+
+
+@pytest.mark.asyncio
+async def test_judge_metadata_attached_when_state_present(monkeypatch):
+    from cv_agents.sub_agents.presenter import agent as presenter_module
+
+    span = _FakeSpan()
+    monkeypatch.setattr(
+        presenter_module, "otel_trace", SimpleNamespace(get_current_span=lambda: span)
+    )
+    ctx = await _make_context(
+        {"cv_draft": FINAL_CV, "customer_cv": "source cv text", "job_description": "jd text"}
+    )
+
+    [event async for event in cv_presenter_agent.run_async(ctx)]
+
+    assert span.attributes["langfuse.observation.metadata.customer_cv"] == "source cv text"
+    assert span.attributes["langfuse.observation.metadata.job_description"] == "jd text"
+
+
+@pytest.mark.asyncio
+async def test_judge_metadata_graceful_when_state_absent(monkeypatch):
+    from cv_agents.sub_agents.presenter import agent as presenter_module
+
+    span = _FakeSpan()
+    monkeypatch.setattr(
+        presenter_module, "otel_trace", SimpleNamespace(get_current_span=lambda: span)
+    )
+    ctx = await _make_context({"cv_draft": FINAL_CV})
+
+    events = [event async for event in cv_presenter_agent.run_async(ctx)]
+
+    assert span.attributes == {}
+    assert events[0].content.parts[0].text == FINAL_CV
