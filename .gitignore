@@ -9,3 +9,6 @@ __pycache__/
 .claude/.spec-reminder-hash
 
 docs/files
+
+frontend/node_modules
+frontend/dist
