@@ -1,0 +1,298 @@
+:root {
+  --paper: #f3f4f7; /* cool paper — deliberately not the cream cliché */
+  --page: #ffffff; /* the CV sheet */
+  --ink: #1e2a44; /* deep ink navy — headings, primary text */
+  --ink-soft: #55607a; /* secondary text */
+  --muted: #8b94a7; /* captions, placeholders */
+  --line: #e3e6ee; /* hairlines */
+  --accent: #bd8438; /* amber — the one warm note, used sparingly */
+  --accent-deep: #9c6c2a;
+  --danger: #9f3b2c;
+  --radius: 12px;
+  --shadow-panel: 0 1px 2px rgba(30, 42, 68, 0.05), 0 6px 20px rgba(30, 42, 68, 0.06);
+  --shadow-sheet: 0 1px 3px rgba(30, 42, 68, 0.08), 0 18px 44px rgba(30, 42, 68, 0.13);
+  --maxw: 46rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3.5rem) 1.25rem 4rem;
+}
+
+/* Masthead ---------------------------------------------------------------- */
+.masthead {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.brand {
+  font-family: "Fraunces", Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 6vw, 3.1rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0;
+}
+
+.tagline {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 0.6rem 0 0;
+  max-width: 34ch;
+}
+
+/* Upload panel ------------------------------------------------------------ */
+.panel {
+  background: var(--page);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.fields {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: block;
+  cursor: pointer;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+/* visually hide the native input but keep it accessible + focusable */
+.field-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.field-pick {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  color: var(--ink-soft);
+  background: #fbfbfd;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.field-pick::before {
+  content: "↑";
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.field:hover .field-pick {
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.field-input:focus-visible + .field-pick {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.field-pick.chosen {
+  border-style: solid;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.field-pick.chosen::before {
+  content: "✓";
+  color: var(--ink);
+}
+
+/* Buttons ----------------------------------------------------------------- */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.7rem 1.3rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.05s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  width: 100%;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: #16203a;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-accent:hover {
+  background: var(--accent-deep);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--line);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+/* Working state ----------------------------------------------------------- */
+.working {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 0.28rem;
+}
+
+.dots i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.dots i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.dots i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-0.18rem);
+  }
+}
+
+/* Result: the CV as a sheet of paper -------------------------------------- */
+.result {
+  margin-top: 0.5rem;
+}
+
+.sheet {
+  background: var(--page);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sheet);
+  padding: clamp(1.75rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
+  /* a ruled left margin, like a letterhead / manuscript */
+  border-left: 3px solid var(--accent);
+}
+
+.sheet pre {
+  font-family: "Fraunces", Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Notices ----------------------------------------------------------------- */
+.notice {
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.notice.error {
+  background: #fbf0ee;
+  color: var(--danger);
+  border: 1px solid #eecfc9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dots i {
+    animation: none;
+    opacity: 0.7;
+  }
+  .btn:active {
+    transform: none;
+  }
+}

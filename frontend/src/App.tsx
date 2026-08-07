@@ -47,43 +47,102 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
   }
 
   function rerun() {
-    if (
-      !downloaded &&
-      !window.confirm("Rerunning will discard this draft. Download it first?")
-    ) {
-      return;
+    // Rerunning throws away the current draft. If it hasn't been
+    // downloaded yet, check the user is willing to lose it first.
+    if (!downloaded) {
+      const discardAnyway = window.confirm(
+        "Rerunning will discard this draft. Continue without downloading?",
+      );
+      if (!discardAnyway) return;
     }
+
     setPhase("idle");
     setResult("");
     setDownloaded(false);
   }
 
+  const running = phase === "running";
+
   return (
-    <main>
-      <h1>CV Improver</h1>
+    <div className="app">
+      <header className="masthead">
+        <h1 className="brand">CV Improver</h1>
+        <p className="tagline">Tailor your CV to a role — without inventing anything.</p>
+      </header>
 
-      <label>
-        Your CV
-        <input type="file" onChange={(e) => setCv(e.target.files?.[0] ?? null)} />
-      </label>
-      <label>
-        Job description
-        <input type="file" onChange={(e) => setJd(e.target.files?.[0] ?? null)} />
-      </label>
+      {(phase === "idle" || running) && (
+        <section className="panel">
+          <div className="fields">
+            <label className="field">
+              <span className="field-label">Your CV</span>
+              <input
+                className="field-input"
+                type="file"
+                disabled={running}
+                onChange={(e) => setCv(e.target.files?.[0] ?? null)}
+              />
+              <span className={cv ? "field-pick chosen" : "field-pick"}>
+                {cv ? cv.name : "Choose a text file…"}
+              </span>
+            </label>
 
-      <button onClick={improve} disabled={!cv || !jd || phase === "running"}>
-        Improve my CV
-      </button>
+            <label className="field">
+              <span className="field-label">Job description</span>
+              <input
+                className="field-input"
+                type="file"
+                disabled={running}
+                onChange={(e) => setJd(e.target.files?.[0] ?? null)}
+              />
+              <span className={jd ? "field-pick chosen" : "field-pick"}>
+                {jd ? jd.name : "Choose a text file…"}
+              </span>
+            </label>
+          </div>
 
-      {phase === "running" && <p>Improving your CV — this takes a couple of minutes…</p>}
-      {phase === "failed" && <p role="alert">{error}</p>}
-      {phase === "done" && (
-        <>
-          <pre>{result}</pre>
-          <button onClick={download}>Download</button>
-          <button onClick={rerun}>Rerun</button>
-        </>
+          <button className="btn btn-primary" onClick={improve} disabled={!cv || !jd || running}>
+            {running ? "Working…" : "Improve my CV"}
+          </button>
+
+          {running && (
+            <div className="working">
+              <span className="dots">
+                <i />
+                <i />
+                <i />
+              </span>
+              Improving your CV — this takes a couple of minutes…
+            </div>
+          )}
+        </section>
       )}
-    </main>
+
+      {phase === "failed" && (
+        <section className="panel">
+          <p className="notice error" role="alert">
+            {error}
+          </p>
+          <button className="btn btn-ghost" onClick={() => setPhase("idle")}>
+            Try again
+          </button>
+        </section>
+      )}
+
+      {phase === "done" && (
+        <section className="result">
+          <article className="sheet">
+            <pre>{result}</pre>
+          </article>
+          <div className="actions">
+            <button className="btn btn-accent" onClick={download}>
+              Download
+            </button>
+            <button className="btn btn-ghost" onClick={rerun}>
+              Rerun
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }
