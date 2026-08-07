@@ -20,6 +20,8 @@ English, preserving factual accuracy while tailoring emphasis to the role.
 | Config | `pydantic-settings` reading `.env` (`cv_agents/config.py`, env prefix `GOOGLE_`, Langfuse keys via `validation_alias`) |
 | Observability | Langfuse v4 (self-hosted, Docker) + `openinference-instrumentation-google-adk` |
 | Evals | ADK evalsets + pytest (`AgentEvaluator`), plus a custom integration test |
+| API | FastAPI + uvicorn (job model over the guarded Runner); pypdf + fpdf2 for PDF in/out |
+| Frontend | React 19 + Vite + TypeScript (vitest + Testing Library) |
 
 ## 3. Architecture
 
@@ -122,6 +124,34 @@ renders as `<not serializable>`).
 - The final CV is persisted by `cv_presenter_agent` as artifact
   `improved_cv.md` (in-memory service, so per-process like everything else).
   `tools.save_generated_file` remains unused.
+
+### 3.5 Web layer (API + frontend)
+
+Design + phased plan: `docs/superpowers/specs/2026-08-07-frontend-api-design.md`
+and the `docs/superpowers/plans/2026-08-07-*-phase1.md` plans. Phase 1 is
+built; the analysis panel, editor agent, and conversational editing are
+Phase 2+.
+
+- **Shared runner** — `cv_agents/run_pipeline.run_once(artifacts, message,
+  user_id)` is the single "fresh guarded session → load artifacts → run →
+  capture final event" helper, used by the API and the experiment runner
+  (main.py stays separate: interactive, persistent session). Returns
+  `(final_author, final_text)`.
+- **API** — `api/` (FastAPI). Wraps the SAME guarded Runner
+  (`plugins=[GuardrailsPlugin()]`) via `run_once`, never `adk web`. A job
+  model decouples the 2–3 min run from the request:
+  `POST /jobs` (multipart cv + jd) → `{job_id}`; `GET /jobs/{id}` polls
+  (`running`/`done`/`failed`); `GET /jobs/{id}/cv[.pdf]` fetches the result.
+  A produced CV vs a guardrail refusal is told apart by the final event's
+  author (`cv_presenter_agent` vs `cv_agent_app`, in `api/pipeline.classify`).
+  In-memory job store; a 429 is retried with backoff before the job fails;
+  failures are logged.
+- **PDF** — `api/documents.py`: PDF uploads are extracted to text at the API
+  boundary (pypdf) BEFORE the pipeline, so the guardrails still see text; the
+  finished CV is rendered to a downloadable PDF (fpdf2).
+- **Frontend** — `frontend/` (React 19 + Vite + TypeScript). One-shot upload
+  → poll → CV-as-paper → download (PDF) / rerun. Talks to the API via a Vite
+  dev proxy. Run both with `./start`.
 
 ## 4. Configuration
 
@@ -314,9 +344,10 @@ workflow is pytest + Langfuse traces as the single record.
      (shared with the input gate via `limits.py`) + markdown-artifact
      detection; problems are logged. Tests:
      `tests/guardrails/test_outputs.py`.
-   - Runtime: WIRED — `GuardrailsPlugin` (`runtime.py`), registered on all
-     three Runners (`main.py`, experiment runner, integration test; NOT
-     `adk web`, which builds its own Runner). Per-run LLM-call ceiling of
+   - Runtime: WIRED — `GuardrailsPlugin` (`runtime.py`), registered on every
+     Runner we build — `main.py`, the shared `run_once` helper (so the API
+     and experiment runner inherit it), and the integration test; NOT
+     `adk web`, which builds its own Runner. Per-run LLM-call ceiling of
      25 (worst case is ~15; breach raises `CallCeilingExceeded` — a loud
      stop, quota is the casualty otherwise) and a 120s per-call timeout
      stamped on every request via `http_options` (2026-08-04: a verifier

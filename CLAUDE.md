@@ -39,6 +39,8 @@ cv_agent_app (root LlmAgent — tools: list_uploaded_files, load_customer_docume
 
 Tools return `.model_dump()` dicts (not Pydantic objects) so Langfuse tool spans render real payloads instead of `<not serializable>`.
 
+**Web layer:** `cv_agents/run_pipeline.run_once` is the shared "run the guarded pipeline once" helper (used by the API and experiment runner). `api/` is a FastAPI job-model service over that Runner (PDF in/out via `api/documents.py`); `frontend/` is a React/Vite SPA. `./start` runs both. Full detail in SPEC 3.5.
+
 ## Observability & evals
 
 - Every run is traced to a **local Langfuse** (Docker, `http://localhost:3000`; compose project lives in `../langfuse`). Instrumentation: `GoogleADKInstrumentor` in `main.py` (app runs, user `user_1`) and `tests/eval/conftest.py` (eval runs, user `test_user`, sessions prefixed `___eval___session___`). The Langfuse client must be initialized **before** agents run or spans are dropped.
