@@ -13,31 +13,19 @@ from cv_agents.agent import root_agent
 from guardrails.runtime import GuardrailsPlugin
 from cv_agents.debug_plugin import maybe_debug_plugins
 from cv_agents.config import Config
+from cv_agents.observability import init_langfuse
 
-from langfuse import get_client
-
-from openinference.instrumentation.google_adk import GoogleADKInstrumentor
-
-GoogleADKInstrumentor().instrument()
+# Instrument ADK->Langfuse (+ export env) before agents run. Shared with the
+# API and experiment runner so this block can't drift per entry point.
+langfuse = init_langfuse()
 
 warnings.filterwarnings("ignore", category=UserWarning, module=".*pydantic.*")
 logger = logging.getLogger(__name__)
 config = Config()
 
-# Export Vertex AI / Langfuse settings from .env into the environment
-config.setup_environment()
-
 USER_ID = "user_1"
 # Unique per run so each chat groups as its own session in Langfuse
 SESSION_ID = f"session_{datetime.now():%Y%m%d_%H%M%S}"
-
-langfuse = get_client()
-
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
 
 
 async def load_example_files_to_artifacts(

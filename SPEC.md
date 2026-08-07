@@ -193,12 +193,20 @@ it before creating clients/instrumentation. Auth is gcloud ADC
   NOT work — fix accounts via direct `users`-table updates or a reseed.
 - Instrumentation is `GoogleADKInstrumentor().instrument()`; the Langfuse
   client (`get_client()`) MUST be initialized before agents run — it registers
-  the OTel exporter; spans emitted before that are silently dropped.
+  the OTel exporter; spans emitted before that are silently dropped. Every
+  entry point calls the shared `cv_agents/observability.py:init_langfuse()`
+  (instrument + `setup_environment` + authenticated client; idempotent) rather
+  than re-pasting the block — the historical bug was the API path forgetting
+  it, so prod runs were untraced and the presenter's judge metadata had no span
+  to attach to.
 - Who traces what:
   - `main.py` → app runs, user `user_1`, session `session_<timestamp>`,
     environment `local` (`LANGFUSE_TRACING_ENVIRONMENT` in `.env`, exported
     by `Config.setup_environment()` via setdefault so the pytest conftest
     wins)
+  - `api/app.py` → prod job runs, user `pipeline_user`, environment `local`
+    (calls `init_langfuse()` at startup, flushes per job); picked up by the
+    live evaluators like `main.py` runs
   - ALL pytest runs → environment `pytest` (`tests/conftest.py` sets
     `LANGFUSE_TRACING_ENVIRONMENT` before imports — needed because importing
     cv_agents initialises the Langfuse client for prompt fetching, so even

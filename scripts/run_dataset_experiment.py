@@ -25,14 +25,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from cv_agents.config import Config
 
 config = Config()
-config.setup_environment()
 
-from langfuse import get_client
-from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+from cv_agents.observability import init_langfuse
 
-# Langfuse client must exist before agents run: it registers the OTel exporter
-langfuse = get_client()
-GoogleADKInstrumentor().instrument()
+# Instrument + export env + authenticated client, before agents run. Shared
+# with main.py and the API so this block can't drift per entry point.
+langfuse = init_langfuse()
 
 from evals import ALL_EVALUATORS
 

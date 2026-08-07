@@ -13,8 +13,14 @@ from fastapi.responses import PlainTextResponse
 from api.documents import render_pdf, to_text_bytes
 from api.jobs import JobStore
 from api.pipeline import run_cv_pipeline
+from cv_agents.observability import init_langfuse
 
 logger = logging.getLogger(__name__)
+
+# Wire ADK->Langfuse tracing before any job runs, so prod runs are traced and
+# the live evaluators fire. Without this the API path runs blind (see
+# cv_agents/observability.py). Returned client is used to flush per job below.
+_langfuse = init_langfuse()
 
 app = FastAPI(title="cv-agent")
 store = JobStore()
@@ -26,31 +32,37 @@ _RETRY_DELAYS = (10, 30, 60, 120)
 
 
 async def _run(job_id: str, cv_bytes: bytes, jd_bytes: bytes) -> None:
-    for attempt, delay in enumerate((*_RETRY_DELAYS, None)):
-        try:
-            result = await run_cv_pipeline(cv_bytes, jd_bytes)
-            break
-        except Exception as e:  # pipeline blew up (not a guardrail refusal)
-            is_quota = "429" in str(e)
-            if is_quota and delay is not None:
-                logger.warning(
-                    "429 on job %s (attempt %d); retrying in %ss", job_id, attempt + 1, delay
+    try:
+        for attempt, delay in enumerate((*_RETRY_DELAYS, None)):
+            try:
+                result = await run_cv_pipeline(cv_bytes, jd_bytes)
+                break
+            except Exception as e:  # pipeline blew up (not a guardrail refusal)
+                is_quota = "429" in str(e)
+                if is_quota and delay is not None:
+                    logger.warning(
+                        "429 on job %s (attempt %d); retrying in %ss", job_id, attempt + 1, delay
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                logger.exception("Pipeline run failed for job %s", job_id)
+                detail = (
+                    "Too many requests right now — please wait a minute and try again."
+                    if is_quota
+                    else "The pipeline failed. Please try again."
                 )
-                await asyncio.sleep(delay)
-                continue
-            logger.exception("Pipeline run failed for job %s", job_id)
-            detail = (
-                "Too many requests right now — please wait a minute and try again."
-                if is_quota
-                else "The pipeline failed. Please try again."
-            )
-            store.mark_failed(job_id, detail)
-            return
+                store.mark_failed(job_id, detail)
+                return
 
-    if result.cv is not None:
-        store.mark_done(job_id, result.cv)
-    else:
-        store.mark_failed(job_id, result.error or "Unknown error.")
+        if result.cv is not None:
+            store.mark_done(job_id, result.cv)
+        else:
+            store.mark_failed(job_id, result.error or "Unknown error.")
+    finally:
+        # Short-lived job: force the OTel batch exporter to ship this run's
+        # spans now, so the trace and its live evaluators aren't lost if the
+        # process idles before the next batch flush.
+        _langfuse.flush()
 
 
 @app.post("/jobs", status_code=202)
