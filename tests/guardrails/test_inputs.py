@@ -71,7 +71,12 @@ class FakeGenAIClient:
                 raise error
             return SimpleNamespace(parsed=verdict)
 
-        self.aio = SimpleNamespace(models=SimpleNamespace(generate_content=generate_content))
+        async def aclose():
+            pass
+
+        self.aio = SimpleNamespace(
+            models=SimpleNamespace(generate_content=generate_content), aclose=aclose
+        )
 
 
 class FakeArmorClient:
@@ -80,6 +85,12 @@ class FakeArmorClient:
     def __init__(self, match_state=None, error=None):
         self._match_state = match_state
         self._error = error
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
 
     async def sanitize_user_prompt(self, request):
         if self._error is not None:

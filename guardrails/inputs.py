@@ -129,22 +129,27 @@ async def check_plausibility(cv_text: str, jd_text: str) -> PlausibilityVerdict:
     unavailable quality gate must not take the product down with it."""
     try:
         client = genai.Client()
-        response = await client.aio.models.generate_content(
-            model=_MODEL,
-            contents=_PROMPT.format(
-                cv_excerpt=cv_text[:_EXCERPT_CHARS],
-                jd_excerpt=jd_text[:_EXCERPT_CHARS],
-            ),
-            config=types.GenerateContentConfig(
-                temperature=0,
-                response_mime_type="application/json",
-                response_schema=PlausibilityVerdict,
-            ),
-        )
-        verdict = response.parsed
-        if verdict is None:
-            raise ValueError("model returned no parseable verdict")
-        return verdict
+        try:
+            response = await client.aio.models.generate_content(
+                model=_MODEL,
+                contents=_PROMPT.format(
+                    cv_excerpt=cv_text[:_EXCERPT_CHARS],
+                    jd_excerpt=jd_text[:_EXCERPT_CHARS],
+                ),
+                config=types.GenerateContentConfig(
+                    temperature=0,
+                    response_mime_type="application/json",
+                    response_schema=PlausibilityVerdict,
+                ),
+            )
+            verdict = response.parsed
+            if verdict is None:
+                raise ValueError("model returned no parseable verdict")
+            return verdict
+        finally:
+            # Close the client's network session; otherwise each call leaks
+            # an aiohttp session ("Unclosed client session").
+            await client.aio.aclose()
     except Exception as e:
         logger.warning(f"Plausibility check unavailable, failing open: {e}")
         return PlausibilityVerdict(cv_ok=True, jd_ok=True, reason="")
@@ -169,27 +174,29 @@ async def check_injection(cv_text: str, jd_text: str) -> InputVerdict:
     down would be worse than the risk it covers for a single-user app."""
     project = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
     try:
-        client = modelarmor_v1.ModelArmorAsyncClient(
+        # `async with` closes the client's transport when we are done; a
+        # fresh client per call would otherwise leak its connection.
+        async with modelarmor_v1.ModelArmorAsyncClient(
             client_options={"api_endpoint": f"modelarmor.{_ARMOR_LOCATION}.rep.googleapis.com"}
-        )
-        template = (
-            f"projects/{project}/locations/{_ARMOR_LOCATION}/templates/{_ARMOR_TEMPLATE_ID}"
-        )
-        for label, text in (("CV", cv_text), ("job description", jd_text)):
-            response = await client.sanitize_user_prompt(
-                request=modelarmor_v1.SanitizeUserPromptRequest(
-                    name=template,
-                    user_prompt_data=modelarmor_v1.DataItem(text=text),
-                )
+        ) as client:
+            template = (
+                f"projects/{project}/locations/{_ARMOR_LOCATION}/templates/{_ARMOR_TEMPLATE_ID}"
             )
-            state = response.sanitization_result.filter_match_state
-            if state == modelarmor_v1.FilterMatchState.MATCH_FOUND:
-                logger.warning(f"Model Armor flagged the {label}.")
-                return InputVerdict(
-                    ok=False,
-                    reason=f"The {label} contains content that looks like an attempt "
-                    "to manipulate the system.",
+            for label, text in (("CV", cv_text), ("job description", jd_text)):
+                response = await client.sanitize_user_prompt(
+                    request=modelarmor_v1.SanitizeUserPromptRequest(
+                        name=template,
+                        user_prompt_data=modelarmor_v1.DataItem(text=text),
+                    )
                 )
+                state = response.sanitization_result.filter_match_state
+                if state == modelarmor_v1.FilterMatchState.MATCH_FOUND:
+                    logger.warning(f"Model Armor flagged the {label}.")
+                    return InputVerdict(
+                        ok=False,
+                        reason=f"The {label} contains content that looks like an attempt "
+                        "to manipulate the system.",
+                    )
         return InputVerdict(ok=True)
     except Exception as e:
         logger.warning(f"Injection screening unavailable, letting the upload continue: {e}")
