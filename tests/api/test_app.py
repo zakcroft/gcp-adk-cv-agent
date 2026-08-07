@@ -90,6 +90,35 @@ def test_pdf_upload_is_accepted(monkeypatch):
     assert seen["cv"][:5] != b"%PDF-"
 
 
+def test_transient_429_is_retried_then_succeeds(monkeypatch):
+    monkeypatch.setattr(appmod, "_RETRY_DELAYS", (0,))  # no real waiting
+    calls = {"n": 0}
+
+    async def flaky(cv, jd):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("ClientError: 429 RESOURCE_EXHAUSTED")
+        return PipelineResult(cv="IMPROVED CV", error=None)
+
+    monkeypatch.setattr(appmod, "run_cv_pipeline", flaky)
+    client = TestClient(app)
+    job_id = _submit(client).json()["job_id"]
+    body = _wait(client, job_id, "done")
+    assert body["error"] is None
+    assert calls["n"] == 2  # failed once, retried, succeeded
+
+
+def test_non_quota_error_fails_immediately(monkeypatch):
+    async def boom(cv, jd):
+        raise RuntimeError("something broke")
+
+    monkeypatch.setattr(appmod, "run_cv_pipeline", boom)
+    client = TestClient(app)
+    job_id = _submit(client).json()["job_id"]
+    body = _wait(client, job_id, "failed")
+    assert "failed" in body["error"].lower()
+
+
 def test_unknown_job_is_404():
     assert TestClient(app).get("/jobs/nope").status_code == 404
 
