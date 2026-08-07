@@ -15,7 +15,6 @@ View results: Langfuse UI -> Datasets -> <dataset> -> Runs.
 
 import asyncio
 import sys
-import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -35,16 +34,9 @@ from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 langfuse = get_client()
 GoogleADKInstrumentor().instrument()
 
-from google.adk.artifacts import InMemoryArtifactService
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
-
 from evals import ALL_EVALUATORS
 
-from cv_agents.agent import root_agent
-from guardrails.runtime import GuardrailsPlugin
-from cv_agents.debug_plugin import maybe_debug_plugins
+from cv_agents.run_pipeline import run_once
 
 PROJECT_ROOT = Path(__file__).parent.parent
 USER_ID = "experiment_user"
@@ -79,38 +71,7 @@ def resolve_item(item_input):
 
 async def run_pipeline(message: str, artifacts) -> str:
     """One full agent run in a fresh session; returns the final response text."""
-    session_id = f"experiment_{uuid.uuid4().hex[:8]}"
-    session_service = InMemorySessionService()
-    artifact_service = InMemoryArtifactService()
-
-    await session_service.create_session(
-        app_name=config.app_name, user_id=USER_ID, session_id=session_id
-    )
-    for filename, content in artifacts:
-        await artifact_service.save_artifact(
-            app_name=config.app_name,
-            user_id=USER_ID,
-            session_id=session_id,
-            filename=filename,
-            artifact=types.Part.from_bytes(data=content, mime_type="text/plain"),
-        )
-
-    runner = Runner(
-        agent=root_agent,
-        app_name=config.app_name,
-        artifact_service=artifact_service,
-        session_service=session_service,
-        plugins=[GuardrailsPlugin(), *maybe_debug_plugins()],
-    )
-
-    final_text = ""
-    new_message = types.Content(role="user", parts=[types.Part(text=message)])
-    async for event in runner.run_async(
-        user_id=USER_ID, session_id=session_id, new_message=new_message
-    ):
-        if event.is_final_response() and event.content and event.content.parts:
-            if event.content.parts[0].text:
-                final_text = event.content.parts[0].text
+    _, final_text = await run_once(artifacts, message, user_id=USER_ID)
     return final_text
 
 
