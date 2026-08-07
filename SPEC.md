@@ -411,7 +411,5 @@ workflow is pytest + Langfuse traces as the single record.
 - British English in all agent-facing prose and generated CVs.
 - Generated CVs must not LOOK tailored: never name the target company or
   vacancy (writer prompt v2, 2026-08-06; expected outputs curated to match).
-- Commit style: imperative subject + bulleted body; NO Claude co-author
-  trailer. Author identity: `Zak Croft <1917622+zakcroft@users.noreply.github.com>`.
 - Never `git push` and never delete files unless the owner explicitly asks.
 - `black`/`ruff` line length 100 (pyproject.toml).
