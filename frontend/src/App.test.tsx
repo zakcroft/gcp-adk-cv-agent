@@ -42,3 +42,20 @@ test("shows the refusal reason when the job fails", async () => {
 
   expect(await screen.findByText(/please upload a real cv/i)).toBeInTheDocument();
 });
+
+test("rerun warns when the draft has not been downloaded", async () => {
+  vi.spyOn(api, "submitJob").mockResolvedValue("job1");
+  vi.spyOn(api, "getJob").mockResolvedValue({ status: "done", error: null });
+  vi.spyOn(api, "getCv").mockResolvedValue("IMPROVED CV TEXT");
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+
+  render(<App pollMs={5} />);
+  await uploadBoth();
+  await userEvent.click(screen.getByRole("button", { name: /improve my cv/i }));
+  await screen.findByText("IMPROVED CV TEXT");
+  await userEvent.click(screen.getByRole("button", { name: /rerun/i }));
+
+  expect(confirm).toHaveBeenCalled();
+  // confirm returned false -> draft still shown
+  expect(screen.getByText("IMPROVED CV TEXT")).toBeInTheDocument();
+});

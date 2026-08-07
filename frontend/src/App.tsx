@@ -10,12 +10,14 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const [downloaded, setDownloaded] = useState(false);
 
   async function improve() {
     if (!cv || !jd) return;
     setPhase("running");
     setError("");
     setResult("");
+    setDownloaded(false);
     const id = await submitJob(cv, jd);
     while (true) {
       const s = await getJob(id);
@@ -31,6 +33,29 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
       }
       await sleep(pollMs);
     }
+  }
+
+  function download() {
+    const blob = new Blob([result], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "improved_cv.md";
+    a.click();
+    URL.revokeObjectURL(url);
+    setDownloaded(true);
+  }
+
+  function rerun() {
+    if (
+      !downloaded &&
+      !window.confirm("Rerunning will discard this draft. Download it first?")
+    ) {
+      return;
+    }
+    setPhase("idle");
+    setResult("");
+    setDownloaded(false);
   }
 
   return (
@@ -52,7 +77,13 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
 
       {phase === "running" && <p>Improving your CV — this takes a couple of minutes…</p>}
       {phase === "failed" && <p role="alert">{error}</p>}
-      {phase === "done" && <pre>{result}</pre>}
+      {phase === "done" && (
+        <>
+          <pre>{result}</pre>
+          <button onClick={download}>Download</button>
+          <button onClick={rerun}>Rerun</button>
+        </>
+      )}
     </main>
   );
 }
