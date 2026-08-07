@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Start the full stack for local development: the FastAPI service and the
+# Vite frontend, together. Ctrl-C stops both (kill 0 tears down the whole
+# process group, including npm's child vite process).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+if [ ! -d frontend/node_modules ]; then
+  echo "Installing frontend dependencies…"
+  (cd frontend && npm install)
+fi
+
+trap 'kill 0' EXIT
+
+echo "API      → http://localhost:8000"
+uv run python -m api.app &
+
+echo "Frontend → http://localhost:5173 (Vite picks the next free port if taken)"
+(cd frontend && npm run dev) &
+
+wait

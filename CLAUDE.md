@@ -13,6 +13,7 @@ uv run pytest tests/eval/test_improve_cv_flow.py  # happy-path integration test 
 uv run adk web                                # ADK dev UI (browser) — root_agent is exposed by cv_agents
 uv run python scripts/run_dataset_experiment.py [dataset] [run-name]  # regression run over Langfuse dataset + correctness judge
 uv run python -m api.app                       # serve the HTTP API on :8000 (job model over the guarded Runner)
+./start                                        # full stack: API (:8000) + Vite frontend (:5173); Ctrl-C stops both
 ```
 
 - Run the two eval test files **separately**, not as one `pytest tests/eval/` run: together they burst ~12 Gemini calls and trip Vertex AI 429 quota. A 429 is quota, not a bug — re-run after a minute.
