@@ -12,6 +12,9 @@ dependencies = [
     "openinference-instrumentation-google-adk>=0.1.17",
     "pydantic>=2.12.3",
     "pydantic-settings>=2.11.0",
+    "fastapi>=0.120",
+    "uvicorn>=0.38",
+    "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]
