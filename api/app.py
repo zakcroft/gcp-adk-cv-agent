@@ -9,6 +9,7 @@ import asyncio
 from fastapi import FastAPI, HTTPException, Response, UploadFile
 from fastapi.responses import PlainTextResponse
 
+from api.documents import render_pdf, to_text_bytes
 from api.jobs import JobStore
 from api.pipeline import run_cv_pipeline
 
@@ -30,7 +31,10 @@ async def _run(job_id: str, cv_bytes: bytes, jd_bytes: bytes) -> None:
 
 @app.post("/jobs", status_code=202)
 async def create_job(cv: UploadFile, jd: UploadFile) -> dict:
-    cv_bytes, jd_bytes = await cv.read(), await jd.read()
+    # Normalise PDFs to text at the boundary so the pipeline (and its
+    # guardrails) always see plain text.
+    cv_bytes = to_text_bytes(await cv.read())
+    jd_bytes = to_text_bytes(await jd.read())
     job = store.create()
     asyncio.create_task(_run(job.id, cv_bytes, jd_bytes))
     return {"job_id": job.id}
@@ -44,14 +48,28 @@ def get_job(job_id: str) -> dict:
     return {"status": job.status, "error": job.error}
 
 
-@app.get("/jobs/{job_id}/cv")
-def get_cv(job_id: str) -> Response:
+def _ready_cv(job_id: str) -> str:
     job = store.get(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Unknown job")
     if job.status != "done" or job.cv is None:
         raise HTTPException(status_code=409, detail="CV not ready")
-    return PlainTextResponse(job.cv, media_type="text/markdown")
+    return job.cv
+
+
+@app.get("/jobs/{job_id}/cv")
+def get_cv(job_id: str) -> Response:
+    return PlainTextResponse(_ready_cv(job_id), media_type="text/markdown")
+
+
+@app.get("/jobs/{job_id}/cv.pdf")
+def get_cv_pdf(job_id: str) -> Response:
+    pdf = render_pdf(_ready_cv(job_id))
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="improved_cv.pdf"'},
+    )
 
 
 if __name__ == "__main__":

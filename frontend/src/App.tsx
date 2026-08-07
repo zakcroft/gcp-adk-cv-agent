@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getCv, getJob, submitJob } from "./api";
+import { getCv, getCvPdf, getJob, submitJob } from "./api";
 
 type Phase = "idle" | "running" | "done" | "failed";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -10,6 +10,7 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const [jobId, setJobId] = useState("");
   const [downloaded, setDownloaded] = useState(false);
 
   async function improve() {
@@ -19,6 +20,7 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
     setResult("");
     setDownloaded(false);
     const id = await submitJob(cv, jd);
+    setJobId(id);
     while (true) {
       const s = await getJob(id);
       if (s.status === "done") {
@@ -35,12 +37,12 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
     }
   }
 
-  function download() {
-    const blob = new Blob([result], { type: "text/markdown" });
+  async function download() {
+    const blob = await getCvPdf(jobId);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "improved_cv.md";
+    a.download = "improved_cv.pdf";
     a.click();
     URL.revokeObjectURL(url);
     setDownloaded(true);
@@ -78,11 +80,12 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
               <input
                 className="field-input"
                 type="file"
+                accept=".pdf,.txt,application/pdf,text/plain"
                 disabled={running}
                 onChange={(e) => setCv(e.target.files?.[0] ?? null)}
               />
               <span className={cv ? "field-pick chosen" : "field-pick"}>
-                {cv ? cv.name : "Choose a text file…"}
+                {cv ? cv.name : "Choose a PDF or text file…"}
               </span>
             </label>
 
@@ -91,11 +94,12 @@ export default function App({ pollMs = 2000 }: { pollMs?: number }) {
               <input
                 className="field-input"
                 type="file"
+                accept=".pdf,.txt,application/pdf,text/plain"
                 disabled={running}
                 onChange={(e) => setJd(e.target.files?.[0] ?? null)}
               />
               <span className={jd ? "field-pick chosen" : "field-pick"}>
-                {jd ? jd.name : "Choose a text file…"}
+                {jd ? jd.name : "Choose a PDF or text file…"}
               </span>
             </label>
           </div>

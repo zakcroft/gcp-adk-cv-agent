@@ -21,3 +21,8 @@ export async function getCv(id: string): Promise<string> {
   const res = await fetch(`/jobs/${id}/cv`);
   return res.text();
 }
+
+export async function getCvPdf(id: string): Promise<Blob> {
+  const res = await fetch(`/jobs/${id}/cv.pdf`);
+  return res.blob();
+}

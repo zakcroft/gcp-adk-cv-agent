@@ -61,7 +61,7 @@ async def check_inputs(cv_data: bytes, cv_mime: str, jd_data: bytes, jd_mime: st
     tier."""
     # Plain text that decodes as UTF-8? Must pass before decoding is safe.
     if not check_readable(cv_data, cv_mime) or not check_readable(jd_data, jd_mime):
-        return InputVerdict(ok=False, reason="Files must be plain text (not PDF or Word).")
+        return InputVerdict(ok=False, reason="Files must be a PDF or a plain-text document.")
 
     cv_text = cv_data.decode("utf-8")
     jd_text = jd_data.decode("utf-8")

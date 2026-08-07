@@ -125,7 +125,7 @@ async def test_chain_stops_at_deterministic_failure_without_calling_services(mon
     verdict = await check_inputs(b"%PDF-1.4", "application/pdf", JD_TEXT.encode(), "text/plain")
 
     assert verdict.ok is False
-    assert "plain text" in verdict.reason
+    assert "plain-text" in verdict.reason
 
 
 @pytest.mark.asyncio

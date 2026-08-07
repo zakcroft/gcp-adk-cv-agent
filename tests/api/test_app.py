@@ -47,6 +47,11 @@ def test_job_reaches_done_with_a_cv(monkeypatch):
     assert body["error"] is None
     assert client.get(f"/jobs/{job_id}/cv").text == "IMPROVED CV"
 
+    pdf = client.get(f"/jobs/{job_id}/cv.pdf")
+    assert pdf.status_code == 200
+    assert pdf.headers["content-type"] == "application/pdf"
+    assert pdf.content[:5] == b"%PDF-"
+
 
 def test_guardrail_refusal_marks_job_failed(monkeypatch):
     async def fake(cv, jd):
@@ -57,6 +62,32 @@ def test_guardrail_refusal_marks_job_failed(monkeypatch):
     job_id = _submit(client).json()["job_id"]
     body = _wait(client, job_id, "failed")
     assert body["error"] == "Please upload a real CV."
+
+
+def test_pdf_upload_is_accepted(monkeypatch):
+    from api.documents import render_pdf
+
+    seen = {}
+
+    async def fake(cv, jd):
+        seen["cv"] = cv
+        return PipelineResult(cv="IMPROVED CV", error=None)
+
+    monkeypatch.setattr(appmod, "run_cv_pipeline", fake)
+    client = TestClient(app)
+    pdf = render_pdf("Owen Prentice\nSoftware Developer\nBuilt Django services.")
+    r = client.post(
+        "/jobs",
+        files={
+            "cv": ("cv.pdf", pdf, "application/pdf"),
+            "jd": ("jd.txt", b"a plain job description", "text/plain"),
+        },
+    )
+    assert r.status_code == 202
+    _wait(client, r.json()["job_id"], "done")
+    # the PDF reached the pipeline as extracted text, not raw PDF bytes
+    assert b"Owen Prentice" in seen["cv"]
+    assert seen["cv"][:5] != b"%PDF-"
 
 
 def test_unknown_job_is_404():
