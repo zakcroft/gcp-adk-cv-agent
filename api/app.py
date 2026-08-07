@@ -52,3 +52,9 @@ def get_cv(job_id: str) -> Response:
     if job.status != "done" or job.cv is None:
         raise HTTPException(status_code=409, detail="CV not ready")
     return PlainTextResponse(job.cv, media_type="text/markdown")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8000)
